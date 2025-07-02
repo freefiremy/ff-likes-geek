@@ -169,6 +169,40 @@ body {
   animation: spin 1s linear infinite;
 }
 
+/* Typing effect container */
+#loading-messages {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.25rem;
+  color: #00ff00; /* classic green terminal */
+  white-space: pre-wrap;
+  min-height: 4rem;
+  overflow-wrap: break-word;
+  user-select: none;
+}
+
+/* Typing cursor */
+#loading-messages::after {
+  content: '|';
+  animation: blink 1s step-start infinite;
+  margin-left: 2px;
+  color: #00ff00;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Background flicker effect */
+@keyframes flicker {
+  0%, 100% { filter: brightness(0.98); }
+  20%, 40%, 60%, 80% { filter: brightness(1.05) contrast(1.2) saturate(1.5); }
+}
+
+body.hacker-flicker {
+  animation: flicker 0.15s infinite;
+}
 
 
 

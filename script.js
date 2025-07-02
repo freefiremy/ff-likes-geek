@@ -65,7 +65,12 @@ function animateCounter(id, toValue) {
   requestAnimationFrame(updater);
 }
 
-// ========== DARK MODE HACKER MESSAGE SEQUENCE ==========
+// Utility sleep function
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ========== DARK MODE & HACKER MESSAGE SEQUENCE ==========
 const hackerMessages = [
   "Hmmm... why is it so hard to send Likes???",
   "Looks like you haven't registered...",
@@ -74,34 +79,96 @@ const hackerMessages = [
   "UID not found in Free Fire likes registry 😕"
 ];
 
+// Show the dark overlay, creating or reusing it
 function createDarkOverlay() {
-  let overlay = document.createElement("div");
-  overlay.id = "dark-overlay";
-  overlay.className = "fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center text-green-400 text-lg sm:text-xl font-mono transition-opacity duration-1000";
-  document.body.appendChild(overlay);
+  let overlay = document.getElementById("dark-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "dark-overlay";
+    overlay.className = "fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center text-green-400 text-lg sm:text-xl font-mono transition-opacity duration-1000";
+    document.body.appendChild(overlay);
+  }
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'auto';
+  overlay.style.backgroundColor = 'rgba(0,0,0,0.98)';
+  overlay.textContent = '';
   return overlay;
 }
 
-async function showHackerSequence() {
-  return new Promise(resolve => {
-    const overlay = createDarkOverlay();
-    let i = 0;
-    overlay.textContent = hackerMessages[i];
+// Typewriter effect for hacker text
+async function typeMessage(container, message) {
+  container.textContent = "";
+  for (let i = 0; i < message.length; i++) {
+    container.textContent += message.charAt(i);
+    await sleep(40);
+  }
+}
 
-    const next = () => {
-      i++;
-      if (i < hackerMessages.length) {
-        overlay.textContent = hackerMessages[i];
-        setTimeout(next, 2000);
-      } else {
-        setTimeout(() => {
-          overlay.remove();
-          resolve();
-        }, 3000);
-      }
-    };
-    setTimeout(next, 2000);
+// Show hacker message sequence
+async function showHackerSequence() {
+  const overlay = createDarkOverlay();
+  for (const msg of hackerMessages) {
+    await typeMessage(overlay, msg);
+    await sleep(2000);
+  }
+  await sleep(3000);
+  overlay.style.opacity = '0';
+  overlay.style.pointerEvents = 'none';
+  await sleep(1000);
+  overlay.textContent = '';
+}
+
+// Show max likes reached sequence with days remaining and expiration info
+async function showMaxLikesSequence(expirationDate, message) {
+  const overlay = createDarkOverlay();
+
+  const now = new Date();
+  const daysRemaining = g5(expirationDate);
+  const expStr = expirationDate.toLocaleString('en-US', { 
+    timeZone: 'Asia/Colombo', 
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: true 
   });
+
+  const lines = [
+    message,
+    `Days until registration expires: ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`,
+    `Expiration date/time (Sri Lanka): ${expStr}`,
+    "Try again after 1:30 AM Sri Lankan time ⏰",
+    "Or maybe many others already liked your profile...",
+    "Come back tomorrow to send more Likes!"
+  ];
+
+  for (const line of lines) {
+    await typeMessage(overlay, line);
+    await sleep(1800);
+  }
+
+  await sleep(2000);
+  overlay.style.opacity = '0';
+  overlay.style.pointerEvents = 'none';
+  await sleep(1000);
+  overlay.textContent = '';
+}
+
+// Show loading spinner overlay for n ms
+async function showLoadingOverlay(duration = 2500) {
+  const overlay = createDarkOverlay();
+  overlay.textContent = '';
+
+  // Add spinner element
+  const spinner = document.createElement('div');
+  spinner.className = 'spinner'; // make sure spinner CSS is defined
+  overlay.appendChild(spinner);
+
+  await sleep(duration);
+
+  overlay.style.opacity = '0';
+  overlay.style.backgroundColor = 'rgba(0,0,0,0)';
+  await sleep(1000);
+  overlay.style.pointerEvents = 'none';
+  overlay.textContent = '';
 }
 
 // ========== MAIN FUNCTION ==========
@@ -119,28 +186,58 @@ async function sendLike() {
     respDiv.innerHTML = `<div class="response-error animate-fade-in">Oops! 😔 Please enter a valid numeric UID!</div>`;
     return;
   }
+
+  btn.disabled = true;
+  input.disabled = true;
+
+  await showLoadingOverlay(2500);
+
   if (!reg[uid]) {
     await showHackerSequence();
     respDiv.innerHTML = `<div class="response-error animate-fade-in">You're not registered yet... 😔</div>`;
+    btn.disabled = false;
+    input.disabled = false;
     return;
   }
 
   const { e } = reg[uid];
   if (now > e) {
     respDiv.innerHTML = `<div class="response-error animate-fade-in">Your registration has expired. Please renew! 💕</div>`;
+    btn.disabled = false;
+    input.disabled = false;
     return;
   }
 
-  btn.disabled = true;
   btn.textContent = 'Sending...';
-  input.disabled = true;
   respDiv.innerHTML = `<div class="flex items-center justify-center p-4"><div class="spinner"></div></div>`;
 
   try {
     const res = await fetch(g3(uid));
     const dt = await res.json();
 
-    if (dt.status === 1 && dt.response) {
+    if (dt.status === 3) {
+      // Max likes reached: show full hacker messages with details
+      await showLoadingOverlay(2000);
+      await showMaxLikesSequence(e, dt.message);
+
+      // Also show in normal response box
+      const daysRemaining = g5(e);
+      const expStr = e.toLocaleString('en-US', { 
+        timeZone: 'Asia/Colombo', 
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: true 
+      });
+      respDiv.innerHTML = `
+        <div class="response-error animate-fade-in space-y-1">
+          <div>${dt.message}</div>
+          <div>Days until registration expires: <strong>${daysRemaining}</strong> day${daysRemaining !== 1 ? 's' : ''}</div>
+          <div>Expiration date/time (Sri Lanka): <strong>${expStr}</strong></div>
+          <div>Try again after 1:30 AM Sri Lankan time ⏰</div>
+          <div>Or maybe many others already liked your profile...</div>
+          <div>Come back tomorrow to send more Likes!</div>
+        </div>`;
+    } else if (dt.status === 1 && dt.response) {
       const nick = await f1(uid);
       const days = g5(e);
       respDiv.innerHTML = `
@@ -170,6 +267,7 @@ async function sendLike() {
   }
 }
 
+// ========== COPY RESPONSE ==========
 function copyResponse() {
   const resp = document.querySelector('#response-custom .response-text');
   if (!resp) return;
@@ -187,6 +285,7 @@ function copyResponse() {
     .catch(() => console.error('Copy failed'));
 }
 
+// ========== BACKGROUND SWITCHING ==========
 const backgrounds = [
   "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/3fe7feec69108f571f70f3be93a84752.jpg",
   "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20255/792f0508b08f3f324bd37eefcd07e2ed.jpg"
