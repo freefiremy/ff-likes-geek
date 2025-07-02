@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Free Fire Profile Likes</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 sm:p-6">
   <div class="max-w-md w-full bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 transform transition-all duration-500 ease-out">
     <h1 class="text-4xl font-bold text-center text-white mb-6 tracking-tight">GEEK FF Likes Store</h1>
     <p class="text-center text-gray-400 text-sm mb-8">Boost your registered Free Fire profile with premium likes! 🌟</p>
 
-    <!-- Input Form -->
     <div class="space-y-6 animate-fade-in-up">
       <div>
         <label for="custom-uid" class="block text-sm font-medium text-gray-300 mb-2">Enter Your UID</label>
@@ -22,40 +21,41 @@
           placeholder="e.g., 12345678"
           onkeypress="if(event.key === 'Enter') sendLike()"
           class="w-full p-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
-        >
+        />
       </div>
       <button
+        id="send-button"
         onclick="sendLike()"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Send Like
       </button>
       <div id="response-custom" class="mt-4 text-sm text-gray-400 animate-fade-in"></div>
     </div>
 
-<!-- Contact Section -->
-<div class="mt-8 text-center">
-  <p class="text-gray-400 text-sm mb-2">Haven’t registered for likes? 😊</p>
-  <p class="text-gray-300 text-sm mb-4">Contact our team to join the fun! 💖</p>
-  <div class="flex justify-center space-x-4">
-    <a
-      href="https://wa.me/94701974205?text=%F0%9F%91%8B%20Hey!%20I%E2%80%99m%20interested%20in%20the%20Like%20Access%20package!%20%E2%9D%A4%EF%B8%8F%0A%0A%F0%9F%97%93%EF%B8%8F%20Duration%3A%201%20Month%0A%F0%9F%92%B0%20Price%3A%20Rs.%20500%0A%0A%F0%9F%91%8D%20Total%20Likes%3A%203000%0A%F0%9F%94%A2%20Max%20Likes%20per%20Day%3A%20100%0A%0A%E2%9C%A8%20Let%20me%20know%20how%20to%20get%20started!"
-      target="_blank"
-      class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center space-x-2"
-    >
-      <span class="text-lg">📱</span>
-      <span>Contact GEEK on WhatsApp</span>
-    </a>
-    <a
-      href="https://www.tiktok.com/@geek_slc"
-      target="_blank"
-      class="bg-black hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center space-x-2"
-    >
-      <span class="text-lg">🎵</span>
-      <span>TikTok</span>
-    </a>
+    <div class="mt-8 text-center">
+      <p class="text-gray-400 text-sm mb-2">Haven’t registered for likes? 😊</p>
+      <p class="text-gray-300 text-sm mb-4">Contact our team to join the fun! 💖</p>
+      <div class="flex justify-center space-x-4">
+        <a
+          href="https://wa.me/94701974205?text=👋%20I'm%20interested%20in%20the%20Like%20Access%20package!"
+          target="_blank"
+          class="whatsapp-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300"
+        >
+          <span class="text-lg">📱</span>
+          <span>Contact GEEK on WhatsApp</span>
+        </a>
+        <a
+          href="https://www.tiktok.com/@geek_slc"
+          target="_blank"
+          class="bg-black hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center space-x-2"
+        >
+          <span class="text-lg">🎵</span>
+          <span>TikTok</span>
+        </a>
+      </div>
+    </div>
   </div>
-</div>
 
   <script src="script.js"></script>
 </body>
