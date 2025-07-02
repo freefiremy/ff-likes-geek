@@ -1,7 +1,24 @@
-/* Use Apple-like system font stack */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+@font-face {
+  font-family: 'GFF';
+  src: url('https://dl.dir.freefiremobile.com/common/web_event/official2/dist/client/fonts/GFFLatinW05-Bold.d2bc101.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
 }
+
+@font-face {
+  font-family: 'GFF';
+  src: url('https://dl.dir.freefiremobile.com/common/web_event/official2/dist/client/fonts/GFFLatinW05-Regular.7b8bcd3.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GFF';
+  src: url('https://dl.dir.freefiremobile.com/common/web_event/official2/dist/client/fonts/GFFLatinW05-Thin.45f3334.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
 
 /* Custom animation for fade-in effect */
 @keyframes fadeInUp {
@@ -129,3 +146,48 @@ body {
   padding: 12px;
   color: #eab308; /* Tailwind yellow-500 */
 }
+
+body {
+  background-color: #000;
+  background-image: url('https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/3fe7feec69108f571f70f3be93a84752.jpg');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  font-family: 'GFF', sans-serif;
+}
+
+@media (max-width: 768px) {
+  body {
+    background-image: url('https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20255/792f0508b08f3f324bd37eefcd07e2ed.jpg');
+    background-size: cover;
+    background-position: center top;
+  }
+}
+
+
+
+
+
+
+/* Rendered size:	900 × 848 px
+Rendered aspect ratio:	225∶212
+Intrinsic size:	1920 × 1080 px
+Intrinsic aspect ratio:	16∶9
+File size:	439 kB
+Current source:	https://dl.dir.freefiremobile.com/common/web_event…na.all/20256/c024d971c211294105fc8f9c601c6b38.jpg
+
+Rendered size:	750 × 1020 px
+Rendered aspect ratio:	25∶34
+File size:	273 kB
+Current source:	https://dl.dir.freefiremobile.com/common/web_event…na.all/20256/c9c426bf3dd73879cfb499b56825681f.jpg
+
+for NAV BAR (top)
+Rendered size:	128 × 20 px
+Rendered aspect ratio:	32∶5
+Intrinsic size:	616 × 90 px
+Intrinsic aspect ratio:	308∶45
+File size:	8.3 kB
+Current source:	https://dl.dir.freefiremobile.com/common/web_event/official2/dist/client/img/full_logo.969f536.png
+
+*/

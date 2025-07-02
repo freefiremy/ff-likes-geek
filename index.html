@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -5,50 +6,60 @@
   <title>Free Fire Profile Likes</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex items-center justify-center p-4 sm:p-6">
-  <div class="max-w-md w-full bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 transform transition-all duration-500 ease-out">
-    <h1 class="text-4xl font-bold text-center text-white mb-6 tracking-tight">GEEK FF Likes Store</h1>
-    <p class="text-center text-gray-400 text-sm mb-8">Boost your registered Free Fire profile with premium likes! 🌟</p>
+
+<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 transform transition-all duration-500 ease-out">
+    <h1 class="text-3xl sm:text-4xl font-bold text-center text-white mb-4 sm:mb-6 tracking-tight">GEEK FF Likes Store</h1>
+    <p class="text-center text-gray-400 text-sm sm:text-base mb-6 sm:mb-8">Boost your registered Free Fire profile with premium likes! 🌟</p>
 
     <div class="space-y-6 animate-fade-in-up">
       <div>
-        <label for="custom-uid" class="block text-sm font-medium text-gray-300 mb-2">Enter Your UID</label>
+        <label for="custom-uid" class="block text-sm font-medium text-gray-300 mb-1 sm:mb-2">Enter Your UID</label>
         <input
           id="custom-uid"
           type="text"
           placeholder="e.g., 12345678"
           onkeypress="if(event.key === 'Enter') sendLike()"
-          class="w-full p-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+          class="w-full p-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-sm sm:text-base"
         />
       </div>
       <button
         id="send-button"
         onclick="sendLike()"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
       >
         Send Like
       </button>
-      <div id="response-custom" class="mt-4 text-sm text-gray-400 animate-fade-in"></div>
+      <div id="response-custom" class="mt-4 text-sm sm:text-base text-gray-400 animate-fade-in"></div>
     </div>
 
     <div class="mt-8 text-center">
-      <p class="text-gray-400 text-sm mb-2">Haven’t registered for likes? 😊</p>
-      <p class="text-gray-300 text-sm mb-4">Contact our team to join the fun! 💖</p>
-      <div class="flex justify-center space-x-4">
-        <a href="https://wa.me/94701974205?text=👋%20I'm%20interested%20in%20the%20Like%20Access%20package!" target="_blank"
-          class="whatsapp-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300">
-          <span class="text-lg">📱</span>
-          <span>Contact GEEK on WhatsApp</span>
+      <p class="text-gray-400 text-sm sm:text-base mb-2">Haven’t registered for likes? 😊</p>
+      <p class="text-gray-300 text-sm sm:text-base mb-4">Contact our team to join the fun! 💖</p>
+      <div class="flex flex-col sm:flex-row justify-center items-center sm:space-x-4 space-y-3 sm:space-y-0">
+        <a
+          href="https://wa.me/94701974205?text=👋%20I'm%20interested%20in%20the%20Like%20Access%20package!"
+          target="_blank"
+          class="whatsapp-button bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 w-full sm:w-auto text-sm sm:text-base text-center"
+        >
+          📱 GEEK on WhatsApp
         </a>
-        <a href="https://www.tiktok.com/@geek_slc" target="_blank"
-          class="bg-black hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center space-x-2">
-          <span class="text-lg">🎵</span>
-          <span>TikTok</span>
+        <a
+          href="https://www.tiktok.com/@geek_slc"
+          target="_blank"
+          class="bg-black hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2 w-full sm:w-auto text-sm sm:text-base"
+        >
+          🎵 TikTok
         </a>
       </div>
     </div>
   </div>
-  <script src="script.js"></script>
 </body>
+<link rel="preload" href="https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/c9c426bf3dd73879cfb499b56825681f.jpg" as="image">
+<link rel="preload" href="https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/c024d971c211294105fc8f9c601c6b38.jpg" as="image">
+
+
 </html>
