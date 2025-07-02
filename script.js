@@ -168,17 +168,14 @@ const body = document.body;
 function switchBackground() {
   bgIndex = (bgIndex + 1) % backgrounds.length;
   body.style.backgroundImage = `url('${backgrounds[bgIndex]}')`;
-
-  const delay = Math.floor(Math.random() * 5000) + 5000; // 5000–10000ms
+  const delay = Math.floor(Math.random() * 5000) + 5000;
   setTimeout(switchBackground, delay);
 }
 
-// Start the cycle
 window.addEventListener('DOMContentLoaded', () => {
   body.style.backgroundImage = `url('${backgrounds[0]}')`;
   setTimeout(switchBackground, 5000);
 });
-
 
 window.sendLike = sendLike;
 window.copyResponse = copyResponse;
