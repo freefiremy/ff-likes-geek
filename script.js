@@ -110,21 +110,28 @@ async function sendLike() {
 }
 
 function copyResponse() {
-  const resp = document.querySelector('#response-custom .response-text');
-  if (!resp) return;
-  const txt = resp.innerText.trim();
-  navigator.clipboard.writeText(txt)
-    .then(() => {
-      const btn = document.querySelector('.copy-button');
-      btn.textContent = 'Copied!';
-      btn.classList.replace('bg-gray-600', 'bg-green-500');
-      setTimeout(() => {
-        btn.textContent = 'Copy Response';
-        btn.classList.replace('bg-green-500', 'bg-gray-600');
-      }, 2000);
-    })
-    .catch(() => console.error('Copy failed'));
+  setTimeout(() => {
+    const resp = document.querySelector('#response-custom .response-text');
+    if (!resp) return;
+    const txt = resp.innerText.trim();
+    navigator.clipboard.writeText(txt)
+      .then(() => {
+        const btn = document.querySelector('.copy-button');
+        if (!btn) return;
+        btn.textContent = 'Copied!';
+        btn.classList.replace('bg-gray-600', 'bg-green-500');
+        setTimeout(() => {
+          btn.textContent = 'Copy Response';
+          btn.classList.replace('bg-green-500', 'bg-gray-600');
+        }, 2000);
+      })
+      .catch((err) => {
+        console.error('Copy failed', err);
+        alert("❌ Copy failed. Please try again.");
+      });
+  }, 100);
 }
+
 
 window.sendLike = sendLike;
 window.copyResponse = copyResponse;
