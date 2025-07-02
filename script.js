@@ -157,5 +157,28 @@ function copyResponse() {
     .catch(() => console.error('Copy failed'));
 }
 
+const backgrounds = [
+  "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/3fe7feec69108f571f70f3be93a84752.jpg",
+  "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20255/792f0508b08f3f324bd37eefcd07e2ed.jpg"
+];
+
+let bgIndex = 0;
+const body = document.body;
+
+function switchBackground() {
+  bgIndex = (bgIndex + 1) % backgrounds.length;
+  body.style.backgroundImage = `url('${backgrounds[bgIndex]}')`;
+
+  const delay = Math.floor(Math.random() * 5000) + 5000; // 5000–10000ms
+  setTimeout(switchBackground, delay);
+}
+
+// Start the cycle
+window.addEventListener('DOMContentLoaded', () => {
+  body.style.backgroundImage = `url('${backgrounds[0]}')`;
+  setTimeout(switchBackground, 5000);
+});
+
+
 window.sendLike = sendLike;
 window.copyResponse = copyResponse;

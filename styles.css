@@ -148,22 +148,15 @@
 }
 
 body {
-  background-color: #000;
-  background-image: url('https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/3fe7feec69108f571f70f3be93a84752.jpg');
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
-  background-attachment: fixed;
   font-family: 'GFF', sans-serif;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  background-color: #000;
+  transition: background-image 1.2s ease-in-out;
 }
 
-@media (max-width: 768px) {
-  body {
-    background-image: url('https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20255/792f0508b08f3f324bd37eefcd07e2ed.jpg');
-    background-size: cover;
-    background-position: center top;
-  }
-}
 
 
 
