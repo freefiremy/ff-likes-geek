@@ -159,6 +159,16 @@ body {
 
 
 
+/* Hacker-style loader spinner */
+.hacker-loader-circle {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(34, 197, 94, 0.2); /* lime-400 transparent */
+  border-top-color: #22c55e; /* lime-400 solid */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
 
 
 
