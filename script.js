@@ -80,29 +80,69 @@ function sleep(ms) {
 }
 
 // ========== DARK MODE & HACKER MESSAGE SEQUENCE ==========
+
+// Formatted multi-line hacker messages
 const hackerMessages = [
-  "Hmmm... why is it so hard to send Likes???",
-  "Looks like you haven't registered...",
-  "This UID is not in our vault...",
-  "Searching database...",
-  "UID not found in Free Fire likes registry 😕"
+  "Hmmm... why is it so hard to send Likes?",
+  "Looks like you haven't registered your UID yet.",
+  "This UID doesn't exist in our secure vault.",
+  "🔍 Searching Free Fire likes registry...",
+  "❌ UID not found. Try again with a correct ID."
 ];
+
+// Optional: auto-wrap long messages (used below)
+function formatMessage(msg, maxLen = 40) {
+  const words = msg.split(' ');
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    if ((line + word).length > maxLen) {
+      lines.push(line.trim());
+      line = '';
+    }
+    line += word + ' ';
+  }
+  if (line.trim()) lines.push(line.trim());
+  return lines.join('\n');
+}
 
 // Show the dark overlay, creating or reusing it
 function createDarkOverlay() {
   let overlay = document.getElementById("dark-overlay");
+  let textDiv = document.getElementById("hacker-text");
+
+  // If overlay doesn't exist, create it
   if (!overlay) {
     overlay = document.createElement("div");
     overlay.id = "dark-overlay";
-    overlay.className = "fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center text-green-400 text-lg sm:text-xl font-mono transition-opacity duration-1000";
+    overlay.className = "fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-1000";
+    overlay.style.padding = '0';
+    overlay.style.pointerEvents = 'auto';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.98)'; // FULL DARK
     document.body.appendChild(overlay);
+  } else {
+    // Reset dark background in case it's transparent from loading
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.98)';
   }
+
+  // If hacker-text doesn't exist, create and append it
+  if (!textDiv) {
+    textDiv = document.createElement("div");
+    textDiv.id = "hacker-text";
+    textDiv.className = "text-green-400 font-mono text-base sm:text-lg leading-relaxed whitespace-pre-wrap text-left p-4 max-w-[90vw]";
+    overlay.appendChild(textDiv);
+  }
+
+  // Reset styles and text
   overlay.style.opacity = '1';
   overlay.style.pointerEvents = 'auto';
-  overlay.style.backgroundColor = 'rgba(0,0,0,0.98)';
-  overlay.textContent = '';
-  return overlay;
+  textDiv.textContent = '';
+
+  return textDiv;
 }
+
+
+
 
 // Typewriter effect for hacker text
 async function typeMessage(container, message) {
@@ -115,21 +155,27 @@ async function typeMessage(container, message) {
 
 // Show hacker message sequence
 async function showHackerSequence() {
-  const overlay = createDarkOverlay();
+  const hackerText = createDarkOverlay(); // returns text box inside overlay
   for (const msg of hackerMessages) {
-    await typeMessage(overlay, msg);
+    await typeMessage(hackerText, formatMessage(msg));
     await sleep(2000);
   }
   await sleep(3000);
+
+  const overlay = hackerText.parentElement;
   overlay.style.opacity = '0';
   overlay.style.pointerEvents = 'none';
-  await sleep(1000);
-  overlay.textContent = '';
+  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.98)'; // keep background fully dark after fade
+  hackerText.textContent = '';
 }
+
+
+
 
 // Show max likes reached sequence with days remaining and expiration info
 async function showMaxLikesSequence(expirationDate, message) {
-  const overlay = createDarkOverlay();
+  const hackerText = createDarkOverlay();
+
 
   const now = new Date();
   const daysRemaining = g5(expirationDate);
@@ -150,21 +196,26 @@ async function showMaxLikesSequence(expirationDate, message) {
   ];
 
   for (const line of lines) {
-    await typeMessage(overlay, line);
+    await typeMessage(hackerText, line); //show in red (error)
     await sleep(1800);
   }
 
   await sleep(2000);
-  overlay.style.opacity = '0';
-  overlay.style.pointerEvents = 'none';
-  await sleep(1000);
-  overlay.textContent = '';
+  hackerText.parentElement.style.opacity = '0';
+  hackerText.parentElement.style.pointerEvents = 'none';
+  hackerText.textContent = '';
+
 }
 
 // Show loading spinner overlay for n ms
 async function showLoadingOverlay(duration = 2500) {
-  const overlay = createDarkOverlay();
-  overlay.textContent = '';
+  const hackerText = createDarkOverlay();
+  const overlay = hackerText.parentElement;
+  hackerText.textContent = '';
+
+  // Remove any existing spinner first
+  const oldSpinner = overlay.querySelector(".spinner");
+  if (oldSpinner) oldSpinner.remove();
 
   // Add spinner element
   const spinner = document.createElement('div');
@@ -174,11 +225,16 @@ async function showLoadingOverlay(duration = 2500) {
   await sleep(duration);
 
   overlay.style.opacity = '0';
-  overlay.style.backgroundColor = 'rgba(0,0,0,0)';
+  overlay.style.backgroundColor = 'rgba(0,0,0,100)';
   await sleep(1000);
   overlay.style.pointerEvents = 'none';
-  overlay.textContent = '';
+
+  // Clean up spinner but keep the hacker-text
+  const newSpinner = overlay.querySelector(".spinner");
+  if (newSpinner) newSpinner.remove();
+  hackerText.textContent = '';
 }
+
 
 // ========== MAIN FUNCTION ==========
 async function sendLike() {
