@@ -5,7 +5,6 @@ const p1 = {
   c: ['aHR0cHM6Ly9ub2RlanMt', 'aW5mby52ZXJjZWVsLmFwcC8=', 'L2luZm8=']
 };
 const d1 = {
-  // Valid till 2026-07-14
   'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9', 
   'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9', 
   'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
@@ -14,9 +13,10 @@ const d1 = {
   'MTg5NTAyODg1NA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0xNlQxMjoyNzowMCswNTozMCJ9', 
   'MzY1NDM2Njk2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0zMVQxOTo0MTowMCswNTozMCJ9', 
   'NzUzNTI0ODM5': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wMVQxOTo0MTowMCswNTozMCJ9', 
-  'OTIzODI0NzQx': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNC0yOFQwMDowMDowMCswNTozMCJ9', 
+  'OTIzODI0NzQx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0zMFQwMDowMDowMCswNTozMCJ9', 
   'NTE0NTY0NDc4Ng==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wN1QwMDowMDowMCswNTozMCJ9' 
 };
+
 
 
 let skipAnimations = false;
