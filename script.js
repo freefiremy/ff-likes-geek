@@ -1,4 +1,3 @@
-// ========== ENCODED SETTINGS ==========
 const x1 = 'YXN0dXRlMmsz';
 const p1 = {
   a: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
@@ -6,11 +5,17 @@ const p1 = {
   c: ['aHR0cHM6Ly9ub2RlanMt', 'aW5mby52ZXJjZWVsLmFwcC8=', 'L2luZm8=']
 };
 const d1 = {
-  'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'MTg5NTAyODg1NA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0xNlQxMjoyNzowMCswNTozMCJ9',
-  'MzY1NDM2Njk2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0zMVQxOTo0MTowMCswNTozMCJ9'
+  'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9', 
+  'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9', 
+  'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9', 
+  'MjA1MjU4MDEzMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'Mjg3NDI5MDk2NQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9', 
+  'MTg5NTAyODg1NA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0xNlQxMjoyNzowMCswNTozMCJ9', 
+  'MzY1NDM2Njk2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0zMVQxOTo0MTowMCswNTozMCJ9', 
+  'NzUzNTI0ODM5': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wMVQxOTo0MTowMCswNTozMCJ9', 
+  'OTIzODI0NzQx': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNC0yOFEwMDowMDowMCswNTozMCJ9'
 };
+
 
 // ========== BASIC HELPERS ==========
 function g1() {
@@ -266,6 +271,15 @@ async function sendLike() {
     input.disabled = false;
   }
 }
+
+// ========== DAY COLOR ==========
+function colorizeDays(days) {
+  const value = `<strong>${days}</strong>`;
+  if (days < 10) return `<span style="color:red;font-weight:bold">${value}</span>`;
+  if (days >= 10 && days <= 25) return `<span style="color:yellow;font-weight:bold">${value}</span>`;
+  return `<span style="color:lime;font-weight:bold">${value}</span>`;
+}
+
 
 // ========== COPY RESPONSE ==========
 function copyResponse() {
