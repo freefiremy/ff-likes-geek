@@ -19,6 +19,13 @@ const d1 = {
 };
 
 
+let skipAnimations = false;
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    skipAnimations = true;
+  }
+});
 
 
 // ========== BASIC HELPERS ==========
@@ -76,8 +83,10 @@ function animateCounter(id, toValue) {
 
 // Utility sleep function
 function sleep(ms) {
+  if (skipAnimations) return Promise.resolve();
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 
 // ========== DARK MODE & HACKER MESSAGE SEQUENCE ==========
 
@@ -147,11 +156,16 @@ function createDarkOverlay() {
 // Typewriter effect for hacker text
 async function typeMessage(container, message) {
   container.textContent = "";
-  for (let i = 0; i < message.length; i++) {
-    container.textContent += message.charAt(i);
-    await sleep(40);
+  if (skipAnimations) {
+    container.textContent = message; // instantly show full message
+  } else {
+    for (let i = 0; i < message.length; i++) {
+      container.textContent += message.charAt(i);
+      await sleep(40);
+    }
   }
 }
+
 
 // Show hacker message sequence
 async function showHackerSequence() {
@@ -167,6 +181,8 @@ async function showHackerSequence() {
   overlay.style.pointerEvents = 'none';
   overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.98)'; // keep background fully dark after fade
   hackerText.textContent = '';
+  skipAnimations = false;
+
 }
 
 
@@ -204,6 +220,8 @@ async function showMaxLikesSequence(expirationDate, message) {
   hackerText.parentElement.style.opacity = '0';
   hackerText.parentElement.style.pointerEvents = 'none';
   hackerText.textContent = '';
+
+  skipAnimations = false;
 
 }
 
@@ -248,7 +266,12 @@ async function sendLike() {
   respDiv.innerHTML = "";
 
   if (!/^\d+$/.test(uid)) {
-    respDiv.innerHTML = `<div class="response-error animate-fade-in">Oops! 😔 Please enter a valid numeric UID!</div>`;
+    respDiv.innerHTML = `
+  <div class="response-error animate-fade-in">
+    <div class="response-text">Oops! 😔 Please enter a valid numeric UID!</div>
+    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
+  </div>`;
+
     return;
   }
 
@@ -259,7 +282,12 @@ async function sendLike() {
 
   if (!reg[uid]) {
     await showHackerSequence();
-    respDiv.innerHTML = `<div class="response-error animate-fade-in">You're not registered yet... 😔</div>`;
+    respDiv.innerHTML = `
+  <div class="response-error animate-fade-in">
+    <div class="response-text">You're not registered yet... 😔</div>
+    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
+  </div>`;
+
     btn.disabled = false;
     input.disabled = false;
     return;
@@ -267,7 +295,13 @@ async function sendLike() {
 
   const { e } = reg[uid];
   if (now > e) {
-    respDiv.innerHTML = `<div class="response-error animate-fade-in">Your registration has expired. Please renew! 💕</div>`;
+    respDiv.innerHTML = `
+  <div class="response-error animate-fade-in">
+    <div class="response-text">Your registration has expired. Please renew! 💕</div>
+    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
+  </div>`;
+
+
     btn.disabled = false;
     input.disabled = false;
     return;
@@ -295,13 +329,17 @@ async function sendLike() {
       });
       respDiv.innerHTML = `
         <div class="response-error animate-fade-in space-y-1">
-          <div>${dt.message}</div>
-          <div>Days until registration expires: <strong>${daysRemaining}</strong> day${daysRemaining !== 1 ? 's' : ''}</div>
-          <div>Expiration date/time (Sri Lanka): <strong>${expStr}</strong></div>
-          <div>Try again after 1:30 AM Sri Lankan time ⏰</div>
-          <div>Or maybe many others already liked your profile...</div>
-          <div>Come back tomorrow to send more Likes!</div>
+          <div class="response-text">
+            <div>${dt.message}</div>
+            <div>Days until registration expires: <strong>${daysRemaining}</strong> day${daysRemaining !== 1 ? 's' : ''}</div>
+            <div>Expiration date/time (Sri Lanka): <strong>${expStr}</strong></div>
+            <div>Try again after 1:30 AM Sri Lankan time ⏰</div>
+            <div>Or maybe many others already liked your profile...</div>
+            <div>Come back tomorrow to send more Likes!</div>
+          </div>
+          <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
         </div>`;
+
     } else if (dt.status === 1 && dt.response) {
       const nick = await f1(uid);
       const days = g5(e);
@@ -317,14 +355,24 @@ async function sendLike() {
             📅 <strong>Days Left:</strong> ${days} day${days !== 1 ? 's' : ''}<br>
             ✅ <strong>Status:</strong> Success
           </div>
-          <button onclick="copyResponse()" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
+          <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
         </div>`;
       animateCounter("likes-count", dt.response.LikesGivenByAPI);
     } else {
-      respDiv.innerHTML = `<div class="response-error animate-fade-in">Something went wrong, please try again later.</div>`;
+      respDiv.innerHTML = `
+  <div class="response-error animate-fade-in">
+    <div class="response-text">Something went wrong, please try again later.</div>
+    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
+  </div>`;
+
     }
   } catch (err) {
-    respDiv.innerHTML = `<div class="response-error animate-fade-in">Error: ${err.message}</div>`;
+    respDiv.innerHTML = `
+  <div class="response-error animate-fade-in">
+    <div class="response-text">Error: ${err.message}</div>
+    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
+  </div>`;
+
   } finally {
     btn.disabled = false;
     btn.textContent = 'Send Like';
@@ -342,22 +390,28 @@ function colorizeDays(days) {
 
 
 // ========== COPY RESPONSE ==========
-function copyResponse() {
-  const resp = document.querySelector('#response-custom .response-text');
+function copyResponse(btn) {
+  const resp = btn.closest('#response-custom').querySelector('.response-text');
   if (!resp) return;
   const txt = resp.innerText.trim();
+  btn.disabled = true;
   navigator.clipboard.writeText(txt)
     .then(() => {
-      const btn = document.querySelector('.copy-button');
       btn.textContent = 'Copied!';
       btn.classList.replace('bg-gray-600', 'bg-green-500');
       setTimeout(() => {
         btn.textContent = 'Copy Response';
         btn.classList.replace('bg-green-500', 'bg-gray-600');
+        btn.disabled = false;
       }, 2000);
     })
-    .catch(() => console.error('Copy failed'));
+    .catch(() => {
+      console.error('Copy failed');
+      btn.disabled = false;
+    });
 }
+
+
 
 // ========== BACKGROUND SWITCHING ==========
 const backgrounds = [

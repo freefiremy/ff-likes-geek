@@ -218,6 +218,11 @@ body.hacker-flicker {
   }
 }
 
+.copy-button {
+  cursor: pointer;
+  user-select: none;
+  /* Your styling from your code */
+}
 
 
 /* Rendered size:	900 × 848 px
