@@ -25,7 +25,8 @@ const d1 = {
   'NDAxMjkzNTg3': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MjExNDA2NDAxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MjkwOTg3NTcyNQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
-  'MTQxOTQ2NjI3Mg==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9'
+  'MTQxOTQ2NjI3Mg==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
+  'MzI4MzEwODcxMg==': 'eyJleHBpcmF0aW9uIjoiMjAyOC0wNC0xNFQxMjowMDowMCswNTozMCJ9'
 };
 
 let skipAnimations = true;
@@ -53,19 +54,26 @@ function g3(id) {
 }
 function g4(id) {
   const base = p1.b.map(atob).join('');
-  const api = p1.c.map(atob).join('') + `?uid=${id}`;
-  return base + encodeURIComponent(api);
+  const apiPath = p1.c.map(atob).join('');
+  return base + apiPath + '?uid=' + encodeURIComponent(id);
 }
+
 async function f1(id) {
   try {
     const res = await fetch(g4(id));
-    if (!res.ok) return 'Unknown';
+    if (!res.ok) {
+      console.log('Fetch failed with status', res.status);
+      return 'Unknown';
+    }
     const d = await res.json();
+    console.log('API response for f1:', d);  // Debug log
     return d.response?.PlayerNickname || 'Unknown';
-  } catch {
+  } catch (e) {
+    console.log('Fetch error:', e);
     return 'Unknown';
   }
 }
+
 function g5(e) {
   const n = new Date();
   return Math.max(0, Math.ceil((e - n) / (1000 * 60 * 60 * 24)));
@@ -188,16 +196,18 @@ async function sendLike() {
           <div class="flex items-center justify-center mb-4">
             <div class="checkmark"></div>
           </div>
-          <div class="response-text space-y-2 text-green-700">
-            🎉 <strong>Like sent successfully!</strong><br>
-            👤 <strong>Player:</strong> ${nick}<br>
-            🆔 <strong>UID:</strong> ${dt.response.UID}<br>
-            🚀 <strong>Level:</strong> ${dt.response.PlayerLevel}<br>
-            ❤️ <strong>Likes Given:</strong> <span id="likes-count">0</span><br>
-            🔄 <strong>Likes Before → After:</strong> ${dt.response.LikesbeforeCommand} → ${dt.response.LikesafterCommand}<br>
-            📅 <strong>Days Left:</strong> ${days} day${days !== 1 ? 's' : ''}<br>
-            ✅ <strong>Status:</strong> All good!
-          </div>
+            <div class="response-text text-green-700" style="line-height: 1.5;">
+              <p style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.6em;">
+                🎉 Like sent successfully!
+              </p>
+              <p>👤 <strong>Player:</strong> <strong>${nick}</strong></p>
+              <p>🆔 <strong>UID:</strong> <strong>${dt.response.UID}</strong></p>
+              <p>🚀 <strong>Level:</strong> <strong>${dt.response.PlayerLevel}</strong></p>
+              <p>❤️ <strong>Likes Given:</strong> <strong id="likes-count">0</strong></p>
+              <p>🔄 <strong>Likes Before → After:</strong> <strong>${dt.response.LikesbeforeCommand} → ${dt.response.LikesafterCommand}</strong></p>
+              <p>📅 <strong>Days Left:</strong> <strong>${days} day${days !== 1 ? 's' : ''}</strong></p>
+              <p>✅ <strong>Status:</strong> <strong>All good!</strong></p>
+            </div>
           <button onclick="copyResponse(this)" class="copy-button mt-3 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
             Copy Response
           </button>
