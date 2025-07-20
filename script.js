@@ -1,4 +1,3 @@
-
 const x1 = 'YXN0dXRlMmsz';
 const p1 = {
   a: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
@@ -29,9 +28,6 @@ const d1 = {
   'MTQxOTQ2NjI3Mg==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9'
 };
 
-
-
-
 let skipAnimations = true;
 
 window.addEventListener('keydown', (e) => {
@@ -40,8 +36,6 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-
-// ========== BASIC HELPERS ==========
 function g1() {
   return atob(x1);
 }
@@ -70,7 +64,7 @@ async function f1(id) {
     return d.response?.PlayerNickname || 'Unknown';
   } catch {
     return 'Unknown';
-    }
+  }
 }
 function g5(e) {
   const n = new Date();
@@ -94,180 +88,11 @@ function animateCounter(id, toValue) {
   requestAnimationFrame(updater);
 }
 
-// Utility sleep function
 function sleep(ms) {
   if (skipAnimations) return Promise.resolve();
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
-// ========== DARK MODE & HACKER MESSAGE SEQUENCE ==========
-
-// Formatted multi-line hacker messages
-const hackerMessages = [
-  "Hmmm... why is it so hard to send Likes?",
-  "Looks like you haven't registered your UID yet.",
-  "This UID doesn't exist in our secure vault.",
-  "🔍 Searching Free Fire likes registry...",
-  "❌ UID not found. Try again with a correct ID."
-];
-
-// Optional: auto-wrap long messages (used below)
-function formatMessage(msg, maxLen = 40) {
-  const words = msg.split(' ');
-  const lines = [];
-  let line = '';
-  for (const word of words) {
-    if ((line + word).length > maxLen) {
-      lines.push(line.trim());
-      line = '';
-    }
-    line += word + ' ';
-  }
-  if (line.trim()) lines.push(line.trim());
-  return lines.join('\n');
-}
-
-// Show the dark overlay, creating or reusing it
-function createDarkOverlay() {
-  let overlay = document.getElementById("dark-overlay");
-  let textDiv = document.getElementById("hacker-text");
-
-  // If overlay doesn't exist, create it
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.id = "dark-overlay";
-    overlay.className = "fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-1000";
-    overlay.style.padding = '0';
-    overlay.style.pointerEvents = 'auto';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.98)'; // FULL DARK
-    document.body.appendChild(overlay);
-  } else {
-    // Reset dark background in case it's transparent from loading
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.98)';
-  }
-
-  // If hacker-text doesn't exist, create and append it
-  if (!textDiv) {
-    textDiv = document.createElement("div");
-    textDiv.id = "hacker-text";
-    textDiv.className = "text-green-400 font-mono text-base sm:text-lg leading-relaxed whitespace-pre-wrap text-left p-4 max-w-[90vw]";
-    overlay.appendChild(textDiv);
-  }
-
-  // Reset styles and text
-  overlay.style.opacity = '1';
-  overlay.style.pointerEvents = 'auto';
-  textDiv.textContent = '';
-
-  return textDiv;
-}
-
-
-
-
-// Typewriter effect for hacker text
-async function typeMessage(container, message) {
-  container.textContent = "";
-  if (skipAnimations) {
-    container.textContent = message; // instantly show full message
-  } else {
-    for (let i = 0; i < message.length; i++) {
-      container.textContent += message.charAt(i);
-      await sleep(40);
-    }
-  }
-}
-
-
-// Show hacker message sequence
-async function showHackerSequence() {
-  const hackerText = createDarkOverlay(); // returns text box inside overlay
-  for (const msg of hackerMessages) {
-    await typeMessage(hackerText, formatMessage(msg));
-    await sleep(2000);
-  }
-  await sleep(3000);
-
-  const overlay = hackerText.parentElement;
-  overlay.style.opacity = '0';
-  overlay.style.pointerEvents = 'none';
-  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.98)'; // keep background fully dark after fade
-  hackerText.textContent = '';
-  skipAnimations = false;
-
-}
-
-
-
-
-// Show max likes reached sequence with days remaining and expiration info
-async function showMaxLikesSequence(expirationDate, message) {
-  const hackerText = createDarkOverlay();
-
-
-  const now = new Date();
-  const daysRemaining = g5(expirationDate);
-  const expStr = expirationDate.toLocaleString('en-US', { 
-    timeZone: 'Asia/Colombo', 
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-    hour12: true 
-  });
-
-  const lines = [
-    message,
-    `Days until registration expires: ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`,
-    `Expiration date/time (Sri Lanka): ${expStr}`,
-    "Try again after 1:30 AM Sri Lankan time ⏰",
-    "Or maybe many others already liked your profile...",
-    "Come back tomorrow to send more Likes!"
-  ];
-
-  for (const line of lines) {
-    await typeMessage(hackerText, line); //show in red (error)
-    await sleep(1800);
-  }
-
-  await sleep(2000);
-  hackerText.parentElement.style.opacity = '0';
-  hackerText.parentElement.style.pointerEvents = 'none';
-  hackerText.textContent = '';
-
-  skipAnimations = false;
-
-}
-
-// Show loading spinner overlay for n ms
-async function showLoadingOverlay(duration = 2500) {
-  const hackerText = createDarkOverlay();
-  const overlay = hackerText.parentElement;
-  hackerText.textContent = '';
-
-  // Remove any existing spinner first
-  const oldSpinner = overlay.querySelector(".spinner");
-  if (oldSpinner) oldSpinner.remove();
-
-  // Add spinner element
-  const spinner = document.createElement('div');
-  spinner.className = 'spinner'; // make sure spinner CSS is defined
-  overlay.appendChild(spinner);
-
-  await sleep(duration);
-
-  overlay.style.opacity = '0';
-  overlay.style.backgroundColor = 'rgba(0,0,0,100)';
-  await sleep(1000);
-  overlay.style.pointerEvents = 'none';
-
-  // Clean up spinner but keep the hacker-text
-  const newSpinner = overlay.querySelector(".spinner");
-  if (newSpinner) newSpinner.remove();
-  hackerText.textContent = '';
-}
-
-
-// ========== MAIN FUNCTION ==========
 async function sendLike() {
   const input = document.getElementById('custom-uid');
   const respDiv = document.getElementById('response-custom');
@@ -280,26 +105,26 @@ async function sendLike() {
 
   if (!/^\d+$/.test(uid)) {
     respDiv.innerHTML = `
-  <div class="response-error animate-fade-in">
-    <div class="response-text">Oops! 😔 Please enter a valid numeric UID!</div>
-    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
-  </div>`;
-
+      <div class="response-error animate-fade-in">
+        <div class="response-text">Oops! 😅 That doesn't look like a valid UID. Please enter numbers only.</div>
+        <button onclick="copyResponse(this)" class="copy-button mt-3 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
+          Copy Response
+        </button>
+      </div>`;
     return;
   }
 
   btn.disabled = true;
   input.disabled = true;
 
-  await showLoadingOverlay(2500);
-
   if (!reg[uid]) {
-    await showHackerSequence();
     respDiv.innerHTML = `
-  <div class="response-error animate-fade-in">
-    <div class="response-text">You're not registered yet... 😔</div>
-    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
-  </div>`;
+      <div class="response-error animate-fade-in">
+        <div class="response-text">Hmm... 🤔 Looks like you're not registered yet. Give it a try after registering!</div>
+        <button onclick="copyResponse(this)" class="copy-button mt-3 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
+          Copy Response
+        </button>
+      </div>`;
 
     btn.disabled = false;
     input.disabled = false;
@@ -309,11 +134,12 @@ async function sendLike() {
   const { e } = reg[uid];
   if (now > e) {
     respDiv.innerHTML = `
-  <div class="response-error animate-fade-in">
-    <div class="response-text">Your registration has expired. Please renew! 💕</div>
-    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
-  </div>`;
-
+      <div class="response-error animate-fade-in">
+        <div class="response-text">Hey! 👋 Your registration has expired. Let’s get you renewed and back in action! 💫</div>
+        <button onclick="copyResponse(this)" class="copy-button mt-3 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
+          Copy Response
+        </button>
+      </div>`;
 
     btn.disabled = false;
     input.disabled = false;
@@ -321,18 +147,16 @@ async function sendLike() {
   }
 
   btn.textContent = 'Sending...';
-  respDiv.innerHTML = `<div class="flex items-center justify-center p-4"><div class="spinner"></div></div>`;
+  respDiv.innerHTML = `
+    <div class="flex items-center justify-center p-4">
+      <div class="spinner"></div>
+    </div>`;
 
   try {
     const res = await fetch(g3(uid));
     const dt = await res.json();
 
     if (dt.status === 3) {
-      // Max likes reached: show full hacker messages with details
-      await showLoadingOverlay(2000);
-      await showMaxLikesSequence(e, dt.message);
-
-      // Also show in normal response box
       const daysRemaining = g5(e);
       const expStr = e.toLocaleString('en-US', { 
         timeZone: 'Asia/Colombo', 
@@ -340,52 +164,63 @@ async function sendLike() {
         hour: '2-digit', minute: '2-digit', second: '2-digit',
         hour12: true 
       });
-      respDiv.innerHTML = `
-        <div class="response-error animate-fade-in space-y-1">
-          <div class="response-text">
-            <div>${dt.message}</div>
-            <div>Days until registration expires: <strong>${daysRemaining}</strong> day${daysRemaining !== 1 ? 's' : ''}</div>
-            <div>Expiration date/time (Sri Lanka): <strong>${expStr}</strong></div>
-            <div>Try again after 1:30 AM Sri Lankan time ⏰</div>
-            <div>Or maybe many others already liked your profile...</div>
-            <div>Come back tomorrow to send more Likes!</div>
-          </div>
-          <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
-        </div>`;
 
+      respDiv.innerHTML = `
+        <div class="response-warning animate-fade-in space-y-3 text-yellow-600">
+          <div class="response-text text-lg font-semibold mb-2">${dt.message}</div>
+          <div class="space-y-1 text-yellow-500 text-sm">
+            <p>⏳ You’ve hit your like limit for now, but no worries!</p>
+            <p>📅 Your registration is still active for <strong>${daysRemaining}</strong> day${daysRemaining !== 1 ? 's' : ''}.</p>
+            <p>🕒 Try again after 1:30 AM Sri Lankan time and keep the love going. 💖</p>
+            <p>💡 Pro Tip: Consistency = growth!</p>
+          </div>
+          <button onclick="copyResponse(this)" class="copy-button mt-4 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
+            Copy Response
+          </button>
+        </div>`;
+      
     } else if (dt.status === 1 && dt.response) {
       const nick = await f1(uid);
       const days = g5(e);
+
       respDiv.innerHTML = `
         <div class="response-success animate-success">
-          <div class="flex items-center justify-center mb-4"><div class="checkmark"></div></div>
-          <div class="response-text space-y-2">
-            🔹 <strong>Player:</strong> ${nick}<br>
-            🔸 <strong>UID:</strong> ${dt.response.UID}<br>
-            🆙 <strong>Level:</strong> ${dt.response.PlayerLevel}<br>
-            ❤️ <strong>Given:</strong> <span id="likes-count">0</span><br>
-            🔢 <strong>Before→After:</strong> ${dt.response.LikesbeforeCommand} → ${dt.response.LikesafterCommand}<br>
-            📅 <strong>Days Left:</strong> ${days} day${days !== 1 ? 's' : ''}<br>
-            ✅ <strong>Status:</strong> Success
+          <div class="flex items-center justify-center mb-4">
+            <div class="checkmark"></div>
           </div>
-          <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
+          <div class="response-text space-y-2 text-green-700">
+            🎉 <strong>Like sent successfully!</strong><br>
+            👤 <strong>Player:</strong> ${nick}<br>
+            🆔 <strong>UID:</strong> ${dt.response.UID}<br>
+            🚀 <strong>Level:</strong> ${dt.response.PlayerLevel}<br>
+            ❤️ <strong>Likes Given:</strong> <span id="likes-count">0</span><br>
+            🔄 <strong>Likes Before → After:</strong> ${dt.response.LikesbeforeCommand} → ${dt.response.LikesafterCommand}<br>
+            📅 <strong>Days Left:</strong> ${days} day${days !== 1 ? 's' : ''}<br>
+            ✅ <strong>Status:</strong> All good!
+          </div>
+          <button onclick="copyResponse(this)" class="copy-button mt-3 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
+            Copy Response
+          </button>
         </div>`;
       animateCounter("likes-count", dt.response.LikesGivenByAPI);
+
     } else {
       respDiv.innerHTML = `
-  <div class="response-error animate-fade-in">
-    <div class="response-text">Something went wrong, please try again later.</div>
-    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
-  </div>`;
-
+        <div class="response-error animate-fade-in">
+          <div class="response-text">Uh oh 😕 Something went wrong. Please try again in a bit!</div>
+          <button onclick="copyResponse(this)" class="copy-button mt-3 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
+            Copy Response
+          </button>
+        </div>`;
     }
   } catch (err) {
     respDiv.innerHTML = `
-  <div class="response-error animate-fade-in">
-    <div class="response-text">Error: ${err.message}</div>
-    <button onclick="copyResponse(this)" class="copy-button mt-3 bg-gray-600 hover:bg-gray-700 text-white text-sm py-1 px-3 rounded">Copy Response</button>
-  </div>`;
-
+      <div class="response-error animate-fade-in">
+        <div class="response-text">Whoops! 😓 An error occurred: ${err.message}</div>
+        <button onclick="copyResponse(this)" class="copy-button mt-3 bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded transition duration-200">
+          Copy Response
+        </button>
+      </div>`;
   } finally {
     btn.disabled = false;
     btn.textContent = 'Send Like';
@@ -393,7 +228,6 @@ async function sendLike() {
   }
 }
 
-// ========== DAY COLOR ==========
 function colorizeDays(days) {
   const value = `<strong>${days}</strong>`;
   if (days < 10) return `<span style="color:red;font-weight:bold">${value}</span>`;
@@ -401,34 +235,45 @@ function colorizeDays(days) {
   return `<span style="color:lime;font-weight:bold">${value}</span>`;
 }
 
-
-// ========== COPY RESPONSE ==========
 function copyResponse(btn) {
-  const resp = btn.closest('#response-custom').querySelector('.response-text');
-  if (!resp) return;
-  const txt = resp.innerText.trim();
+  const container = btn.closest('#response-custom');
+  if (!container) {
+    console.error('Response container not found');
+    return;
+  }
+  const resp = container.querySelector('.response-text');
+  if (!resp) {
+    console.error('Response text not found');
+    return;
+  }
+
+  const txt = resp.textContent.trim();
+  if (!txt) {
+    console.warn('No text to copy');
+    return;
+  }
+
   btn.disabled = true;
 
   navigator.clipboard.writeText(txt)
     .then(() => {
       btn.textContent = 'Copied!';
-      btn.style.backgroundColor = '#22c55e'; // Tailwind green-500 hex
+      btn.style.backgroundColor = '#22c55e';
       btn.style.color = '#fff';
       setTimeout(() => {
         btn.textContent = 'Copy Response';
-        btn.style.backgroundColor = ''; // reset to original
+        btn.style.backgroundColor = '';
         btn.style.color = '';
         btn.disabled = false;
       }, 2000);
     })
-    .catch(() => {
-      console.error('Copy failed');
+    .catch((err) => {
+      console.error('Copy failed:', err);
       btn.disabled = false;
     });
 }
 
 
-// ========== BACKGROUND SWITCHING ==========
 const backgrounds = [
   "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/3fe7feec69108f571f70f3be93a84752.jpg",
   "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20255/792f0508b08f3f324bd37eefcd07e2ed.jpg",

@@ -19,8 +19,7 @@
   font-style: normal;
 }
 
-
-/* Custom animation for fade-in effect */
+/* Fade-in up effect */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -36,7 +35,7 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-/* Custom animation for response fade-in */
+/* Fade-in effect */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -46,9 +45,11 @@
   }
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
 
-
-/* Success animation for checkmark and response */
+/* Success animation */
 @keyframes success {
   0% {
     opacity: 0;
@@ -78,8 +79,8 @@
 .spinner {
   width: 24px;
   height: 24px;
-  border: 3px solid rgba(59, 130, 246, 0.3); /* Blue-500 with opacity */
-  border-top-color: #3b82f6; /* Blue-500 */
+  border: 3px solid rgba(59, 130, 246, 0.3);
+  border-top-color: #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -97,7 +98,7 @@
 .checkmark {
   width: 24px;
   height: 24px;
-  stroke: #10b981; /* Green-500 */
+  stroke: #10b981;
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -117,32 +118,32 @@
 
 .whatsapp-button:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3); /* Green-500 glow */
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
 }
 
 /* Response styles */
 .response-error {
-  background: rgba(239, 68, 68, 0.1); /* Tailwind red-500 */
+  background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
   padding: 12px;
-  color: #ef4444; /* Tailwind red-500 */
+  color: #ef4444;
 }
 
 .response-success {
-  background: rgba(34, 197, 94, 0.1); /* Tailwind green-500 */
+  background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
   border-radius: 8px;
   padding: 12px;
-  color: #22c55e; /* Tailwind green-500 */
+  color: #22c55e;
 }
 
 .response-warning {
-  background: rgba(234, 179, 8, 0.1); /* Tailwind yellow-500 */
+  background: rgba(234, 179, 8, 0.1);
   border: 1px solid rgba(234, 179, 8, 0.3);
   border-radius: 8px;
   padding: 12px;
-  color: #eab308; /* Tailwind yellow-500 */
+  color: #eab308;
 }
 
 body {
@@ -155,92 +156,8 @@ body {
   transition: background-image 1.2s ease-in-out;
 }
 
-
-
-/* Hacker-style loader spinner */
-.hacker-loader-circle {
-  width: 60px;
-  height: 60px;
-  border: 6px solid rgba(34, 197, 94, 0.2); /* lime-400 transparent */
-  border-top-color: #22c55e; /* lime-400 solid */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-/* Typing effect container */
-#loading-messages {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 1.25rem;
-  color: #00ff00; /* classic green terminal */
-  white-space: pre-wrap;
-  min-height: 4rem;
-  overflow-wrap: break-word;
-  user-select: none;
-}
-
-/* Typing cursor */
-#loading-messages::after {
-  content: '|';
-  animation: blink 1s step-start infinite;
-  margin-left: 2px;
-  color: #00ff00;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
-/* Background flicker effect */
-@keyframes flicker {
-  0%, 100% { filter: brightness(0.98); }
-  20%, 40%, 60%, 80% { filter: brightness(1.05) contrast(1.2) saturate(1.5); }
-}
-
-body.hacker-flicker {
-  animation: flicker 0.15s infinite;
-}
-
-.spinner {
-  border: 4px solid rgba(0, 255, 0, 0.1);
-  border-left-color: lime;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .copy-button {
   cursor: pointer;
   user-select: none;
-  /* Your styling from your code */
+  /* keep your styling as is */
 }
-
-
-/* Rendered size:	900 × 848 px
-Rendered aspect ratio:	225∶212
-Intrinsic size:	1920 × 1080 px
-Intrinsic aspect ratio:	16∶9
-File size:	439 kB
-Current source:	https://dl.dir.freefiremobile.com/common/web_event…na.all/20256/c024d971c211294105fc8f9c601c6b38.jpg
-
-Rendered size:	750 × 1020 px
-Rendered aspect ratio:	25∶34
-File size:	273 kB
-Current source:	https://dl.dir.freefiremobile.com/common/web_event…na.all/20256/c9c426bf3dd73879cfb499b56825681f.jpg
-
-for NAV BAR (top)
-Rendered size:	128 × 20 px
-Rendered aspect ratio:	32∶5
-Intrinsic size:	616 × 90 px
-Intrinsic aspect ratio:	308∶45
-File size:	8.3 kB
-Current source:	https://dl.dir.freefiremobile.com/common/web_event/official2/dist/client/img/full_logo.969f536.png
-
-*/
