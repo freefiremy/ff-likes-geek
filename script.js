@@ -1,3 +1,4 @@
+
 const x1 = 'YXN0dXRlMmsz';
 const p1 = {
   a: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
@@ -407,13 +408,16 @@ function copyResponse(btn) {
   if (!resp) return;
   const txt = resp.innerText.trim();
   btn.disabled = true;
+
   navigator.clipboard.writeText(txt)
     .then(() => {
       btn.textContent = 'Copied!';
-      btn.classList.replace('bg-gray-600', 'bg-green-500');
+      btn.style.backgroundColor = '#22c55e'; // Tailwind green-500 hex
+      btn.style.color = '#fff';
       setTimeout(() => {
         btn.textContent = 'Copy Response';
-        btn.classList.replace('bg-green-500', 'bg-gray-600');
+        btn.style.backgroundColor = ''; // reset to original
+        btn.style.color = '';
         btn.disabled = false;
       }, 2000);
     })
@@ -422,7 +426,6 @@ function copyResponse(btn) {
       btn.disabled = false;
     });
 }
-
 
 
 // ========== BACKGROUND SWITCHING ==========
