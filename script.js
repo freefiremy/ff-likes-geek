@@ -31,7 +31,7 @@ const d1 = {
 
 
 
-let skipAnimations = false;
+let skipAnimations = true;
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
@@ -428,7 +428,8 @@ function copyResponse(btn) {
 // ========== BACKGROUND SWITCHING ==========
 const backgrounds = [
   "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20256/3fe7feec69108f571f70f3be93a84752.jpg",
-  "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20255/792f0508b08f3f324bd37eefcd07e2ed.jpg"
+  "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20255/792f0508b08f3f324bd37eefcd07e2ed.jpg",
+  "https://dl.dir.freefiremobile.com/common/web_event/official2.ff.garena.all/20257/8f6e52a93de5d9b1a3d7ee40a2b6c2b7.jpg"
 ];
 let bgIndex = 0;
 const body = document.body;
