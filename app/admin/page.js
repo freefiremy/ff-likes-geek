@@ -39,9 +39,7 @@ const ENCODED_REGISTRY = {
 
 const INITIAL_USERS = buildInitialUsersFromRegistry(ENCODED_REGISTRY);
 
-const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
-  like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
   info: ['aHR0cHM6Ly9hcGkuYWxsb3JpZ2lucy53aW4vcmF3P3VybD0='],
   infoPath: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0L2luZm89'],
 };
@@ -153,19 +151,11 @@ export default function AdminDashboardPage() {
   const [newMoney, setNewMoney] = useState(String(DEFAULT_MONEY));
   const [formError, setFormError] = useState('');
   const [profileStats, setProfileStats] = useState({});
-  const [pendingLikes, setPendingLikes] = useState({});
   const [profileFetchError, setProfileFetchError] = useState('');
   const [isProfileLoading, setIsProfileLoading] = useState(false);
 
-  const apiKey = useMemo(() => decodeBase64(gummyNimbus), []);
-  const likeEndpoint = useMemo(() => joinParts(sleepyTrails.like), []);
   const infoEndpoint = useMemo(() => joinParts(sleepyTrails.info), []);
   const infoPath = useMemo(() => joinParts(sleepyTrails.infoPath), []);
-
-  const buildLikeUrl = useCallback(
-    (id) => `${likeEndpoint}${id}?key=${encodeURIComponent(apiKey)}`,
-    [apiKey, likeEndpoint],
-  );
 
   const buildInfoUrl = useCallback(
     (id) => `${infoEndpoint}${encodeURIComponent(`${infoPath}${id}`)}`,
@@ -333,53 +323,16 @@ export default function AdminDashboardPage() {
     [fetchProfileStats],
   );
 
-  const handleLike = useCallback(
-    async (uid) => {
-      setPendingLikes((previous) => ({ ...previous, [uid]: true }));
-      setProfileStats((prev) => ({
-        ...prev,
-        [uid]: { ...prev[uid], error: undefined },
-      }));
-      try {
-        const response = await fetch(buildLikeUrl(uid));
-        if (!response.ok) {
-          throw new Error(`Like service responded with status ${response.status}`);
-        }
-        const data = await response.json();
-        if (data?.status === 3) {
-          throw new Error(data?.message || 'Daily like limit reached for this UID.');
-        }
-        if (!(data?.status === 1 && data?.response)) {
-          throw new Error(data?.message || 'Unable to send like for this UID.');
-        }
-        await refreshProfile(uid);
-      } catch (error) {
-        setProfileStats((prev) => ({
-          ...prev,
-          [uid]: {
-            ...prev[uid],
-            error:
-              error instanceof Error ? error.message : 'Unable to send like for this UID.',
-            loading: false,
-          },
-        }));
-      } finally {
-        setPendingLikes((prev) => {
-          const next = { ...prev };
-          delete next[uid];
-          return next;
-        });
-      }
-    },
-    [buildLikeUrl, refreshProfile],
-  );
-
   const users = useMemo(() => {
     const now = Date.now();
     return usersState.map((user) => {
       const expirationDate = new Date(user.expiration);
-      const isExpired =
-        Number.isNaN(expirationDate.getTime()) ? false : expirationDate.getTime() < now;
+      const expirationTime = expirationDate.getTime();
+      const isValidExpiration = !Number.isNaN(expirationTime);
+      const isExpired = isValidExpiration ? expirationTime < now : false;
+      const daysLeft = isValidExpiration
+        ? Math.max(0, Math.ceil((expirationTime - now) / (1000 * 60 * 60 * 24)))
+        : 0;
       const profile = profileStats[user.uid];
       const likeCount =
         profile && Number.isFinite(Number(profile.likes)) ? Number(profile.likes) : 0;
@@ -389,6 +342,7 @@ export default function AdminDashboardPage() {
         likeCount,
         expirationDate,
         status: isExpired ? 'expired' : 'active',
+        daysLeft,
         money: parseMoney(user.money),
       };
     });
@@ -590,7 +544,8 @@ export default function AdminDashboardPage() {
                 <thead className="text-xs uppercase tracking-[0.3em] text-slate-400">
                   <tr>
                     <th className="py-3 pr-4">UID</th>
-                    <th className="py-3 pr-4">Expiration</th>
+                    <th className="py-3 pr-4">Nickname</th>
+                    <th className="py-3 pr-4">Days Left</th>
                     <th className="py-3 pr-4">Status</th>
                     <th className="py-3 pr-4">Likes</th>
                     <th className="py-3">Actions</th>
@@ -600,17 +555,28 @@ export default function AdminDashboardPage() {
                   {users.map((user) => {
                     const profile = user.profile || {};
                     const isLoading = profile.loading;
-                    const isPendingLike = Boolean(pendingLikes[user.uid]);
                     const likeValue =
                       profile.likes !== null && profile.likes !== undefined
                         ? Number(profile.likes).toLocaleString()
                         : '—';
+                    const nicknameContent = isLoading ? (
+                      <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
+                        Loading…
+                      </span>
+                    ) : profile.error ? (
+                      <span className="text-xs text-rose-300">{profile.error}</span>
+                    ) : (
+                      <span className="font-medium text-slate-100">{profile.nickname ?? 'Unknown'}</span>
+                    );
+                    const daysLeftLabel =
+                      user.daysLeft > 0
+                        ? `${user.daysLeft} day${user.daysLeft === 1 ? '' : 's'}`
+                        : 'Expired';
                     return (
                       <tr key={user.uid}>
                         <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
-                        <td className="py-4 pr-4 text-slate-300">
-                          {formatExpiration(user.expiration)}
-                        </td>
+                        <td className="py-4 pr-4">{nicknameContent}</td>
+                        <td className="py-4 pr-4 text-slate-300">{daysLeftLabel}</td>
                         <td className="py-4 pr-4">
                           <span
                             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${
@@ -635,31 +601,16 @@ export default function AdminDashboardPage() {
                           ) : (
                             <span className="font-semibold text-slate-100">{likeValue}</span>
                           )}
-                          {profile.likesBefore !== null && profile.likesBefore !== undefined && (
-                            <div className="text-[10px] uppercase tracking-[0.25em] text-slate-500">
-                              Prev: {Number(profile.likesBefore).toLocaleString()}
-                            </div>
-                          )}
                         </td>
                         <td className="py-4">
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              className="rounded-full border border-cyan-400/60 bg-cyan-500/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-cyan-100 transition-colors hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                              onClick={() => handleLike(user.uid)}
-                              disabled={isPendingLike || isLoading}
-                            >
-                              {isPendingLike ? 'Sending…' : 'Like'}
-                            </button>
-                            <button
-                              type="button"
-                              className="rounded-full border border-white/15 bg-slate-900/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition-colors hover:bg-slate-800/90 disabled:cursor-not-allowed disabled:opacity-60"
-                              onClick={() => refreshProfile(user.uid)}
-                              disabled={isLoading}
-                            >
-                              Refresh
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            className="rounded-full border border-white/15 bg-slate-900/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition-colors hover:bg-slate-800/90 disabled:cursor-not-allowed disabled:opacity-60"
+                            onClick={() => refreshProfile(user.uid)}
+                            disabled={isLoading}
+                          >
+                            Refresh
+                          </button>
                         </td>
                       </tr>
                     );
@@ -669,52 +620,13 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <aside className="flex flex-col gap-6">
-            <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 backdrop-blur-md">
-              <h2 className="text-lg font-semibold text-slate-50">Status Chart</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                Each bar represents a registered UID. Color indicates active vs expired status.
-              </p>
-              <div className="mt-6 flex h-48 items-end justify-between gap-2">
-                {users.map((user) => (
-                  <div key={user.uid} className="group flex w-full flex-col items-center gap-2">
-                    <div
-                      className={`relative flex w-full items-end justify-center rounded-t-full ${
-                        user.status === 'active' ? 'bg-emerald-400/60' : 'bg-rose-400/60'
-                      } transition-transform group-hover:scale-[1.05]`}
-                      style={{
-                        minHeight: `${logScaleMeta.baseHeight}px`,
-                        height: `${logScaleMeta.baseHeight + (logScaleMeta.maxLog > 0 ? (Math.log10((Number.isFinite(user.likeCount) ? user.likeCount : 0) + 1) / logScaleMeta.maxLog) * logScaleMeta.heightRange : 0)}px`,
-                      }}
-                      title={`UID ${user.uid} · ${user.status} · Likes ${user.likeCount}`}
-                    >
-                      <span className="mb-2 text-xs font-semibold text-slate-900">
-                        {user.likeCount}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-slate-400">
-                      {user.uid.slice(-4)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 text-sm text-slate-300 backdrop-blur-md">
-              <h3 className="text-base font-semibold text-slate-50">Quick Actions</h3>
-              <ul className="mt-4 space-y-2 text-xs leading-relaxed text-slate-400">
-                <li>• Register new UIDs with duration and payment, defaults to LKR 500.</li>
-                <li>• Use Like to trigger the live service, then Refresh to pull the latest count.</li>
-                <li>• Status updates automatically once a registration expires.</li>
-                <li>• Likes and registrations persist locally via secure browser storage.</li>
-                <li>• Log out to clear dashboard access on this device.</li>
-              </ul>
-            </div>
-          </aside>
         </section>
       </div>
     </div>
   );
 }
+
+
+
 
 
