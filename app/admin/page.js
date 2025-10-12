@@ -1,24 +1,50 @@
 'use client';
 
+import { Buffer } from 'buffer';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const AUTH_STORAGE_KEY = 'ff-admin-authenticated';
-const LIKES_STORAGE_KEY = 'ff-admin-likes';
 const USER_STORAGE_KEY = 'ff-admin-users';
+const DEFAULT_MONEY = 500;
 
-const INITIAL_USERS = [
-  { uid: '753524839', expiration: '2025-11-12T00:00:00Z', money: 500 },
-  { uid: '928342415', expiration: '2025-07-30T00:00:00Z', money: 500 },
-  { uid: '365436696', expiration: '2025-08-31T19:41:00Z', money: 500 },
-  { uid: '5145644786', expiration: '2025-09-07T00:00:00Z', money: 500 },
-  { uid: '2607412181', expiration: '2025-10-20T00:00:00Z', money: 500 },
-  { uid: '198773251', expiration: '2025-11-07T00:00:00Z', money: 500 },
-  { uid: '2874290965', expiration: '2026-07-14T12:27:00-05:30', money: 500 },
-  { uid: '2138418869', expiration: '2026-05-01T00:00:00Z', money: 500 },
-  { uid: '1710884148', expiration: '2025-08-04T00:00:00Z', money: 500 },
-  { uid: '1153186180', expiration: '2025-09-17T00:00:00Z', money: 500 },
-];
+const ENCODED_REGISTRY = {
+  'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'MjA1MjU4MDEzMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'Mjg3NDI5MDk2NQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'MTg5NTAyODg1NA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMC0xNVQxMjoyNzowMCswNTozMCJ9',
+  'MzY1NDM2Njk2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0zMVQxOTo0MTowMCswNTozMCJ9',
+  'NzUzNTI0ODM5': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0xMlQwMDowMDowMCswNTozMCJ9',
+  'OTIzODI0NzQx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0zMFQwMDowMDowMCswNTozMCJ9',
+  'NTE0NTY0NDc4Ng==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOS0wN1QwMDowMDowMCswNTozMCJ9',
+  'MTkxODMwMTkxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wM1QwMDowMDowMCswNTozMCJ9',
+  'Mjg4MjQyNTI1': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNS0wMVQwMDowMDowMCswNTozMCJ9',
+  'MjEzODQxODg2OQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNS0wMVQwMDowMDowMCswNTozMCJ9',
+  'MTcxMDg4NDE0OA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
+  'MTcyMTAyODI4': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
+  'MjMyODExMTUzMw==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
+  'OTA4MzQ5NTM2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
+  'NDAxMjkzNTg3': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
+  'MjExNDA2NDAxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
+  'MjkwOTg3NTcyNQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
+  'MTQxOTQ2NjI3Mg==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
+  'MzI4MzEwODcxMg==': 'eyJleHBpcmF0aW9uIjoiMjAyOC0wNC0xNFQxMjowMDowMCswNTozMCJ9',
+  'MTE1MzE4NjE4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOS0xN1QwMDowMDowMCswNTozMCJ9',
+  'MjYwNzQxMjE4MQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMC0yMFQwMDowMDowMCswNTozMCJ9',
+  'MzA4OTAwNDcyNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0yMVQwMDowMDowMCswNTozMCJ9',
+  'MTk4NzczMjUx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0wN1QwMDowMDowMCswNTozMCJ9',
+};
+
+const INITIAL_USERS = buildInitialUsersFromRegistry(ENCODED_REGISTRY);
+
+const gummyNimbus = 'YXN0dXRlMmsz';
+const sleepyTrails = {
+  like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
+  info: ['aHR0cHM6Ly9hcGku', 'YWxsb3JpZ2lucy53aW4=', 'L3Jhdz91cmw9'],
+  infoPath: ['aHR0cHM6Ly9ub2RlanMt', 'aW5mby52ZXJjZWVsLmFwcC8=', 'L2luZm8='],
+};
 
 const DATE_FORMAT_OPTIONS = {
   year: 'numeric',
@@ -33,9 +59,80 @@ const STATUS_STYLES = {
   expired: 'bg-rose-500/15 text-rose-200 border-rose-400/40',
 };
 
+function decodeBase64(value) {
+  if (typeof window !== 'undefined' && typeof window.atob === 'function') {
+    return window.atob(value);
+  }
+  return Buffer.from(value, 'base64').toString('utf-8');
+}
+
+const joinParts = (parts) => parts.map(decodeBase64).join('');
+
 function parseMoney(value) {
   const numeric = Number.parseInt(value, 10);
-  return Number.isFinite(numeric) ? numeric : 500;
+  return Number.isFinite(numeric) ? numeric : DEFAULT_MONEY;
+}
+
+function buildInitialUsersFromRegistry(registry) {
+  if (!registry || typeof registry !== 'object') {
+    return [];
+  }
+
+  return Object.entries(registry).map(([encodedUid, encodedPayload]) => {
+    const uid = decodeBase64(encodedUid);
+    let expiration = new Date().toISOString();
+    let money = DEFAULT_MONEY;
+
+    try {
+      const decodedPayload = JSON.parse(decodeBase64(encodedPayload));
+      if (decodedPayload?.expiration) {
+        expiration = decodedPayload.expiration;
+      }
+      if (decodedPayload?.money !== undefined) {
+        money = parseMoney(decodedPayload.money);
+      }
+    } catch {
+      // swallow decode errors and keep fallback values
+    }
+
+    return {
+      uid,
+      expiration,
+      money,
+    };
+  });
+}
+
+function mergeStoredUsersWithBaseline(storedUsers, baselineUsers) {
+  if (!Array.isArray(storedUsers) || storedUsers.length === 0) {
+    return baselineUsers.map((user) => ({ ...user }));
+  }
+
+  const storedMap = new Map();
+  storedUsers.forEach((user) => {
+    if (!user || typeof user.uid !== 'string') {
+      return;
+    }
+    storedMap.set(user.uid, {
+      ...user,
+      money: parseMoney(user.money),
+    });
+  });
+
+  const merged = baselineUsers.map((user) => {
+    const override = storedMap.get(user.uid);
+    if (override) {
+      storedMap.delete(user.uid);
+      return { ...user, ...override };
+    }
+    return { ...user };
+  });
+
+  storedMap.forEach((user) => {
+    merged.push({ ...user });
+  });
+
+  return merged;
 }
 
 function formatExpiration(expiration) {
@@ -50,16 +147,29 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [likesByUid, setLikesByUid] = useState({});
   const [usersState, setUsersState] = useState(INITIAL_USERS);
   const [newUid, setNewUid] = useState('');
   const [newDays, setNewDays] = useState('');
-  const [newMoney, setNewMoney] = useState('500');
+  const [newMoney, setNewMoney] = useState(String(DEFAULT_MONEY));
   const [formError, setFormError] = useState('');
+  const [profileStats, setProfileStats] = useState({});
+  const [pendingLikes, setPendingLikes] = useState({});
+  const [profileFetchError, setProfileFetchError] = useState('');
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
 
-  const currencyFormatter = useMemo(
-    () => new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }),
-    [],
+  const apiKey = useMemo(() => decodeBase64(gummyNimbus), []);
+  const likeEndpoint = useMemo(() => joinParts(sleepyTrails.like), []);
+  const infoEndpoint = useMemo(() => joinParts(sleepyTrails.info), []);
+  const infoPath = useMemo(() => joinParts(sleepyTrails.infoPath), []);
+
+  const buildLikeUrl = useCallback(
+    (id) => `${likeEndpoint}${id}?key=${encodeURIComponent(apiKey)}`,
+    [apiKey, likeEndpoint],
+  );
+
+  const buildInfoUrl = useCallback(
+    (id) => `${infoEndpoint}${infoPath}?uid=${encodeURIComponent(id)}`,
+    [infoEndpoint, infoPath],
   );
 
   useEffect(() => {
@@ -79,23 +189,9 @@ export default function AdminDashboardPage() {
     setAuthChecked(true);
 
     try {
-      const storedLikes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '{}');
-      if (storedLikes && typeof storedLikes === 'object') {
-        setLikesByUid(storedLikes);
-      }
-    } catch (error) {
-      console.warn('Failed to parse stored likes', error);
-    }
-
-    try {
       const storedUsers = JSON.parse(localStorage.getItem(USER_STORAGE_KEY) || 'null');
       if (Array.isArray(storedUsers) && storedUsers.length) {
-        setUsersState(
-          storedUsers.map((user) => ({
-            ...user,
-            money: parseMoney(user.money),
-          })),
-        );
+        setUsersState(mergeStoredUsersWithBaseline(storedUsers, INITIAL_USERS));
       }
     } catch (error) {
       console.warn('Failed to parse stored users', error);
@@ -109,22 +205,180 @@ export default function AdminDashboardPage() {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(usersState));
   }, [usersState]);
 
+  const fetchProfileStats = useCallback(
+    async (uid) => {
+      const response = await fetch(buildInfoUrl(uid));
+      if (!response.ok) {
+        throw new Error(`Profile API responded with status ${response.status}`);
+      }
+      const data = await response.json();
+      const likesAfter = Number.parseInt(data?.response?.LikesafterCommand, 10);
+      const likesBefore = Number.parseInt(data?.response?.LikesbeforeCommand, 10);
+      return {
+        likes: Number.isFinite(likesAfter) ? likesAfter : null,
+        likesBefore: Number.isFinite(likesBefore) ? likesBefore : null,
+        nickname: data?.response?.PlayerNickname || 'Unknown',
+        level: data?.response?.PlayerLevel ?? null,
+      };
+    },
+    [buildInfoUrl],
+  );
+
+  useEffect(() => {
+    if (!usersState.length) {
+      setProfileStats({});
+      return;
+    }
+
+    let ignore = false;
+
+    setProfileFetchError('');
+    setIsProfileLoading(true);
+    setProfileStats((prev) => {
+      const next = {};
+      usersState.forEach(({ uid }) => {
+        next[uid] = { ...prev[uid], loading: true, error: undefined };
+      });
+      return next;
+    });
+
+    async function loadProfiles() {
+      try {
+        const results = await Promise.all(
+          usersState.map(async ({ uid }) => {
+            try {
+              const stats = await fetchProfileStats(uid);
+              return [uid, { ...stats, loading: false }];
+            } catch (error) {
+              return [
+                uid,
+                {
+                  likes: null,
+                  likesBefore: null,
+                  loading: false,
+                  error:
+                    error instanceof Error
+                      ? error.message
+                      : 'Unable to fetch profile data.',
+                },
+              ];
+            }
+          }),
+        );
+        if (ignore) {
+          return;
+        }
+        const resultsMap = Object.fromEntries(results);
+        const next = {};
+        usersState.forEach(({ uid }) => {
+          next[uid] = resultsMap[uid] ?? { likes: null, likesBefore: null, loading: false };
+        });
+        setProfileStats(next);
+        setIsProfileLoading(false);
+      } catch (error) {
+        if (!ignore) {
+          setProfileFetchError(
+            error instanceof Error ? error.message : 'Unable to load profile data.',
+          );
+          setIsProfileLoading(false);
+        }
+      }
+    }
+
+    loadProfiles();
+
+    return () => {
+      ignore = true;
+    };
+  }, [usersState, fetchProfileStats]);
+
+  const refreshProfile = useCallback(
+    async (uid) => {
+      setProfileStats((prev) => ({
+        ...prev,
+        [uid]: { ...prev[uid], loading: true, error: undefined },
+      }));
+      try {
+        const stats = await fetchProfileStats(uid);
+        setProfileStats((prev) => ({
+          ...prev,
+          [uid]: { ...stats, loading: false },
+        }));
+      } catch (error) {
+        setProfileStats((prev) => ({
+          ...prev,
+          [uid]: {
+            ...prev[uid],
+            loading: false,
+            error:
+              error instanceof Error ? error.message : 'Unable to refresh profile data.',
+          },
+        }));
+      }
+    },
+    [fetchProfileStats],
+  );
+
+  const handleLike = useCallback(
+    async (uid) => {
+      setPendingLikes((previous) => ({ ...previous, [uid]: true }));
+      setProfileStats((prev) => ({
+        ...prev,
+        [uid]: { ...prev[uid], error: undefined },
+      }));
+      try {
+        const response = await fetch(buildLikeUrl(uid));
+        if (!response.ok) {
+          throw new Error(`Like service responded with status ${response.status}`);
+        }
+        const data = await response.json();
+        if (data?.status === 3) {
+          throw new Error(data?.message || 'Daily like limit reached for this UID.');
+        }
+        if (!(data?.status === 1 && data?.response)) {
+          throw new Error(data?.message || 'Unable to send like for this UID.');
+        }
+        await refreshProfile(uid);
+      } catch (error) {
+        setProfileStats((prev) => ({
+          ...prev,
+          [uid]: {
+            ...prev[uid],
+            error:
+              error instanceof Error ? error.message : 'Unable to send like for this UID.',
+            loading: false,
+          },
+        }));
+      } finally {
+        setPendingLikes((prev) => {
+          const next = { ...prev };
+          delete next[uid];
+          return next;
+        });
+      }
+    },
+    [buildLikeUrl, refreshProfile],
+  );
+
   const users = useMemo(() => {
     const now = Date.now();
     return usersState.map((user) => {
       const expirationDate = new Date(user.expiration);
       const isExpired =
         Number.isNaN(expirationDate.getTime()) ? false : expirationDate.getTime() < now;
-      const likeCount = likesByUid[user.uid] ?? 0;
+      const profile = profileStats[user.uid];
+      const likeCount =
+        profile && Number.isFinite(Number(profile.likes)) ? Number(profile.likes) : 0;
       return {
         ...user,
+        profile,
         likeCount,
         expirationDate,
         status: isExpired ? 'expired' : 'active',
         money: parseMoney(user.money),
       };
     });
-  }, [likesByUid, usersState]);
+  }, [profileStats, usersState]);
 
   const statusSummary = useMemo(() => {
     return users.reduce(
@@ -135,19 +389,6 @@ export default function AdminDashboardPage() {
       { active: 0, expired: 0 },
     );
   }, [users]);
-
-  const handleLike = useCallback((uid) => {
-    setLikesByUid((previous) => {
-      const nextLikes = {
-        ...previous,
-        [uid]: (previous?.[uid] ?? 0) + 1,
-      };
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(nextLikes));
-      }
-      return nextLikes;
-    });
-  }, []);
 
   const handleRegisterUser = useCallback(
     (event) => {
@@ -174,7 +415,7 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      const moneyNumber = parseMoney(newMoney || '500');
+      const moneyNumber = parseMoney(newMoney || String(DEFAULT_MONEY));
       if (moneyNumber < 0) {
         setFormError('Money should be a positive number.');
         return;
@@ -193,7 +434,7 @@ export default function AdminDashboardPage() {
       ]);
       setNewUid('');
       setNewDays('');
-      setNewMoney('500');
+      setNewMoney(String(DEFAULT_MONEY));
     },
     [newDays, newMoney, newUid, usersState],
   );
@@ -228,7 +469,8 @@ export default function AdminDashboardPage() {
             </span>
             <h1 className="mt-3 text-3xl font-semibold text-slate-50">Registered Users Overview</h1>
             <p className="mt-2 text-sm text-slate-300">
-              Monitor active registrations, track expirations, and record likes per user.
+              Monitor active registrations, track expirations, and sync likes directly from the
+              profile service.
             </p>
           </div>
           <button
@@ -249,6 +491,11 @@ export default function AdminDashboardPage() {
                   Active: {statusSummary.active} · Expired: {statusSummary.expired}
                 </p>
               </div>
+              {isProfileLoading && (
+                <span className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  Syncing likes…
+                </span>
+              )}
             </div>
 
             <form
@@ -290,7 +537,7 @@ export default function AdminDashboardPage() {
                   onChange={(event) =>
                     setNewMoney(event.target.value.replace(/\D/g, '').slice(0, 6))
                   }
-                  placeholder="500"
+                  placeholder={String(DEFAULT_MONEY)}
                   className="rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2 text-sm font-medium text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
                 />
               </label>
@@ -305,6 +552,12 @@ export default function AdminDashboardPage() {
               )}
             </form>
 
+            {profileFetchError && (
+              <p className="mt-4 rounded-xl border border-rose-500/50 bg-rose-500/10 px-4 py-3 text-xs text-rose-200">
+                {profileFetchError}
+              </p>
+            )}
+
             <div className="mt-6 overflow-x-auto">
               <table className="min-w-full divide-y divide-white/5 text-left text-sm">
                 <thead className="text-xs uppercase tracking-[0.3em] text-slate-400">
@@ -318,39 +571,76 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-sm">
-                  {users.map((user) => (
-                    <tr key={user.uid}>
-                      <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
-                      <td className="py-4 pr-4 text-slate-300">{formatExpiration(user.expiration)}</td>
-                      <td className="py-4 pr-4">
-                        <span
-                          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${
-                            STATUS_STYLES[user.status]
-                          }`}
-                        >
+                  {users.map((user) => {
+                    const profile = user.profile || {};
+                    const isLoading = profile.loading;
+                    const isPendingLike = Boolean(pendingLikes[user.uid]);
+                    const likeValue =
+                      profile.likes !== null && profile.likes !== undefined
+                        ? Number(profile.likes).toLocaleString()
+                        : '—';
+                    return (
+                      <tr key={user.uid}>
+                        <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
+                        <td className="py-4 pr-4 text-slate-300">
+                          {formatExpiration(user.expiration)}
+                        </td>
+                        <td className="py-4 pr-4">
                           <span
-                            className={`h-2 w-2 rounded-full ${
-                              user.status === 'active' ? 'bg-emerald-400' : 'bg-rose-400'
+                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${
+                              STATUS_STYLES[user.status]
                             }`}
-                          />
-                          {user.status}
-                        </span>
-                      </td>
-                      <td className="py-4 pr-4 font-mono text-sm text-slate-200">
-                        {currencyFormatter.format(user.money ?? 500)}
-                      </td>
-                      <td className="py-4 pr-4 font-semibold text-slate-100">{user.likeCount}</td>
-                      <td className="py-4">
-                        <button
-                          type="button"
-                          className="rounded-full border border-cyan-400/60 bg-cyan-500/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-cyan-100 transition-colors hover:bg-cyan-500/25"
-                          onClick={() => handleLike(user.uid)}
-                        >
-                          Like
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          >
+                            <span
+                              className={`h-2 w-2 rounded-full ${
+                                user.status === 'active' ? 'bg-emerald-400' : 'bg-rose-400'
+                              }`}
+                            />
+                            {user.status}
+                          </span>
+                        </td>
+                        <td className="py-4 pr-4 font-mono text-sm text-slate-200">
+                          {currencyFormatter.format(user.money ?? 500)}
+                        </td>
+                        <td className="py-4 pr-4">
+                          {isLoading ? (
+                            <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
+                              Loading…
+                            </span>
+                          ) : profile.error ? (
+                            <span className="text-xs text-rose-300">{profile.error}</span>
+                          ) : (
+                            <span className="font-semibold text-slate-100">{likeValue}</span>
+                          )}
+                          {profile.likesBefore !== null && profile.likesBefore !== undefined && (
+                            <div className="text-[10px] uppercase tracking-[0.25em] text-slate-500">
+                              Prev: {Number(profile.likesBefore).toLocaleString()}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-4">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              className="rounded-full border border-cyan-400/60 bg-cyan-500/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-cyan-100 transition-colors hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                              onClick={() => handleLike(user.uid)}
+                              disabled={isPendingLike || isLoading}
+                            >
+                              {isPendingLike ? 'Sending…' : 'Like'}
+                            </button>
+                            <button
+                              type="button"
+                              className="rounded-full border border-white/15 bg-slate-900/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition-colors hover:bg-slate-800/90 disabled:cursor-not-allowed disabled:opacity-60"
+                              onClick={() => refreshProfile(user.uid)}
+                              disabled={isLoading}
+                            >
+                              Refresh
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -369,7 +659,10 @@ export default function AdminDashboardPage() {
                       className={`relative flex w-full items-end justify-center rounded-t-full ${
                         user.status === 'active' ? 'bg-emerald-400/60' : 'bg-rose-400/60'
                       } transition-transform group-hover:scale-[1.05]`}
-                      style={{ minHeight: '48px', height: `${Math.max(48, user.likeCount * 12 + 48)}px` }}
+                      style={{
+                        minHeight: '48px',
+                        height: `${Math.max(48, user.likeCount * 12 + 48)}px`,
+                      }}
                       title={`UID ${user.uid} · ${user.status} · Likes ${user.likeCount}`}
                     >
                       <span className="mb-2 text-xs font-semibold text-slate-900">
@@ -388,7 +681,7 @@ export default function AdminDashboardPage() {
               <h3 className="text-base font-semibold text-slate-50">Quick Actions</h3>
               <ul className="mt-4 space-y-2 text-xs leading-relaxed text-slate-400">
                 <li>• Register new UIDs with duration and payment, defaults to LKR 500.</li>
-                <li>• Click a UID’s Like button to record an additional like.</li>
+                <li>• Use Like to trigger the live service, then Refresh to pull the latest count.</li>
                 <li>• Status updates automatically once a registration expires.</li>
                 <li>• Likes and registrations persist locally via secure browser storage.</li>
                 <li>• Log out to clear dashboard access on this device.</li>
