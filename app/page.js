@@ -334,12 +334,15 @@ export default function HomePage() {
                   <input
                     id="uid-input"
                     type="tel"
+                    inputMode="numeric"
+                    pattern="\d*"
                     autoComplete="off"
                     className="w-full bg-transparent text-lg font-semibold tracking-wide text-slate-50 placeholder:text-slate-500 focus:outline-none"
                     placeholder="Enter UID"
                     value={uid}
                     onChange={handleUidChange}
                     disabled={isSubmitting}
+                    maxLength={UID_MAX_LENGTH}
                   />
                 </div>
               </div>

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const NAV_LINKS = [
+const BASE_NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/info', label: 'Info' },
   { href: '/ban', label: 'Ban Check' },
@@ -22,11 +22,16 @@ const shouldSkipClientNav = (event) =>
 export function NavBar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [navLinks, setNavLinks] = useState([
+    ...BASE_NAV_LINKS,
+    { href: '/admin/login', label: 'Admin' },
+  ]);
   const menuButtonRef = useRef(null);
   const menuPanelRef = useRef(null);
   const wasMenuOpen = useRef(false);
-  const leftLinks = NAV_LINKS.slice(0, 3);
-  const rightLink = NAV_LINKS[3];
+  const leftLinks = navLinks.length > 4 ? navLinks.slice(0, navLinks.length - 1) : navLinks.slice(0, 3);
+  const rightLink =
+    navLinks.length > 4 ? navLinks[navLinks.length - 1] : navLinks.length > 3 ? navLinks[3] : null;
   const menuId = 'primary-navigation';
 
   const isLinkActive = (href) => {
@@ -36,7 +41,7 @@ export function NavBar() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const activeLink = NAV_LINKS.find(({ href }) => isLinkActive(href));
+  const activeLink = navLinks.find(({ href }) => isLinkActive(href));
 
   const navigateWithReload = useCallback((targetHref) => {
     if (typeof window === 'undefined') {
@@ -59,7 +64,7 @@ export function NavBar() {
         }
         const currentUrl = new URL(window.location.href);
         const parsedTarget = new URL(targetHref, currentUrl);
-        const knownSegments = NAV_LINKS.map(({ href }) =>
+        const knownSegments = navLinks.map(({ href }) =>
           href.replace(/^\//, '').replace(/\/$/, ''),
         );
         const currentSegments = currentUrl.pathname.split('/').filter(Boolean);
@@ -84,6 +89,20 @@ export function NavBar() {
     },
     [navigateWithReload],
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const isAdminAuthorized = localStorage.getItem('ff-admin-authenticated') === 'true';
+    setNavLinks([
+      ...BASE_NAV_LINKS,
+      {
+        href: isAdminAuthorized ? '/admin' : '/admin/login',
+        label: 'Admin',
+      },
+    ]);
+  }, [pathname]);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -238,7 +257,7 @@ export function NavBar() {
             aria-hidden={!isMenuOpen}
           >
             <ul className="flex flex-col gap-2">
-              {NAV_LINKS.map(({ href, label }) => {
+              {navLinks.map(({ href, label }) => {
                 const isActive = isLinkActive(href);
                 return (
                   <li key={href}>
