@@ -34,15 +34,15 @@ If you host the project at `https://<user>.github.io/<repo>/`, update the `NEXT_
 
 ## Project structure
 
-- `app/` – App Router pages, layout, and Tailwind-powered UI. Includes dedicated routes:
-  - `/` – Like sender dashboard and registry validator.
-  - `/info` – UID profile lookup (level, ranks, XP, likes, last login).
-  - `/ban` – Ban status checker backed by the AlliFF ban API.
-  - `/contact` – Support & social channels.
-- `public/` – Static assets served at the root of the exported site.
-- `app/globals.css` – Tailwind directives plus minimal global tweaks.
-- `next.config.mjs` – Configured for static export and GitHub Pages asset prefixing.
-- `out/` – Generated static site after running `npm run build` (commit optional).
+- `app/`   App Router pages, layout, and Tailwind-powered UI. Includes dedicated routes:
+  - `/`   Like sender dashboard and registry validator.
+  - `/info`   UID profile lookup (level, ranks, XP, likes, last login).
+  - `/ban`   Ban status checker backed by the AlliFF ban API.
+  - `/contact`   Support & social channels.
+- `public/`   Static assets served at the root of the exported site.
+- `app/globals.css`   Tailwind directives plus minimal global tweaks.
+- `next.config.mjs`   Configured for static export and GitHub Pages asset prefixing.
+- `out/`   Generated static site after running `npm run build` (commit optional).
 
 ## Notes
 
