@@ -152,6 +152,8 @@ export default function AdminDashboardPage() {
   const [profileStats, setProfileStats] = useState({});
   const [profileFetchError, setProfileFetchError] = useState('');
   const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [isDaysLeftDescending, setIsDaysLeftDescending] = useState(true);
 
   const infoEndpoint = useMemo(() => joinParts(sleepyTrails.info), []);
   const infoPath = useMemo(() => joinParts(sleepyTrails.infoPath), []);
@@ -333,12 +335,9 @@ export default function AdminDashboardPage() {
         ? Math.max(0, Math.ceil((expirationTime - now) / (1000 * 60 * 60 * 24)))
         : 0;
       const profile = profileStats[user.uid];
-      const likeCount =
-        profile && Number.isFinite(Number(profile.likes)) ? Number(profile.likes) : 0;
       return {
         ...user,
         profile,
-        likeCount,
         expirationDate,
         status: isExpired ? 'expired' : 'active',
         daysLeft,
@@ -346,6 +345,21 @@ export default function AdminDashboardPage() {
       };
     });
   }, [profileStats, usersState]);
+
+  const filteredUsers = useMemo(() => {
+    if (statusFilter === 'all') {
+      return users;
+    }
+    return users.filter((user) => user.status === statusFilter);
+  }, [statusFilter, users]);
+
+  const sortedUsers = useMemo(() => {
+    const compare = (a, b) => {
+      const diff = (a.daysLeft ?? 0) - (b.daysLeft ?? 0);
+      return isDaysLeftDescending ? -diff : diff;
+    };
+    return [...filteredUsers].sort(compare);
+  }, [filteredUsers, isDaysLeftDescending]);
 
   const statusSummary = useMemo(() => {
     return users.reduce(
@@ -355,19 +369,6 @@ export default function AdminDashboardPage() {
       },
       { active: 0, expired: 0 },
     );
-  }, [users]);
-
-  const logScaleMeta = useMemo(() => {
-    const maxLikes = users.reduce((max, user) => {
-      const count = Number.isFinite(user.likeCount) ? user.likeCount : 0;
-      return Math.max(max, count);
-    }, 0);
-    const maxLog = Math.log10(maxLikes + 1);
-    return {
-      maxLog,
-      baseHeight: 48,
-      heightRange: 160,
-    };
   }, [users]);
 
   const handleRegisterUser = useCallback(
@@ -543,30 +544,39 @@ export default function AdminDashboardPage() {
                 <thead className="text-xs uppercase tracking-[0.3em] text-slate-400">
                   <tr>
                     <th className="py-3 pr-4">UID</th>
-                    <th className="py-3 pr-4">Nickname</th>
-                    <th className="py-3 pr-4">Days Left</th>
-                    <th className="py-3 pr-4">Status</th>
-                    <th className="py-3 pr-4">Likes</th>
+                    <th className="py-3 pr-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsDaysLeftDescending((previous) => !previous)}
+                        className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300 transition-colors hover:text-slate-100"
+                      >
+                        Days Left
+                        <span aria-hidden="true">{isDaysLeftDescending ? '↓' : '↑'}</span>
+                      </button>
+                    </th>
+                    <th className="py-3 pr-4">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setStatusFilter((previous) =>
+                            previous === 'all' ? 'active' : previous === 'active' ? 'expired' : 'all',
+                          )
+                        }
+                        className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300 transition-colors hover:text-slate-100"
+                      >
+                        Status
+                        {statusFilter !== 'all' && (
+                          <span className="text-[10px] uppercase text-cyan-300">({statusFilter})</span>
+                        )}
+                      </button>
+                    </th>
                     <th className="py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-sm">
-                  {users.map((user) => {
+                  {sortedUsers.map((user) => {
                     const profile = user.profile || {};
                     const isLoading = profile.loading;
-                    const likeValue =
-                      profile.likes !== null && profile.likes !== undefined
-                        ? Number(profile.likes).toLocaleString()
-                        : '—';
-                    const nicknameContent = isLoading ? (
-                      <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                        Loading…
-                      </span>
-                    ) : profile.error ? (
-                      <span className="text-xs text-rose-300">{profile.error}</span>
-                    ) : (
-                      <span className="font-medium text-slate-100">{profile.nickname ?? 'Unknown'}</span>
-                    );
                     const daysLeftLabel =
                       user.daysLeft > 0
                         ? `${user.daysLeft} day${user.daysLeft === 1 ? '' : 's'}`
@@ -574,7 +584,6 @@ export default function AdminDashboardPage() {
                     return (
                       <tr key={user.uid}>
                         <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
-                        <td className="py-4 pr-4">{nicknameContent}</td>
                         <td className="py-4 pr-4 text-slate-300">{daysLeftLabel}</td>
                         <td className="py-4 pr-4">
                           <span
@@ -590,26 +599,22 @@ export default function AdminDashboardPage() {
                             {user.status}
                           </span>
                         </td>
-                        <td className="py-4 pr-4">
-                          {isLoading ? (
-                            <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                              Loading…
-                            </span>
-                          ) : profile.error ? (
-                            <span className="text-xs text-rose-300">{profile.error}</span>
-                          ) : (
-                            <span className="font-semibold text-slate-100">{likeValue}</span>
-                          )}
-                        </td>
                         <td className="py-4">
-                          <button
-                            type="button"
-                            className="rounded-full border border-white/15 bg-slate-900/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition-colors hover:bg-slate-800/90 disabled:cursor-not-allowed disabled:opacity-60"
-                            onClick={() => refreshProfile(user.uid)}
-                            disabled={isLoading}
-                          >
-                            Refresh
-                          </button>
+                          <div className="flex flex-col gap-2">
+                            <button
+                              type="button"
+                              className="rounded-full border border-white/15 bg-slate-900/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition-colors hover:bg-slate-800/90 disabled:cursor-not-allowed disabled:opacity-60"
+                              onClick={() => refreshProfile(user.uid)}
+                              disabled={isLoading}
+                            >
+                              Refresh
+                            </button>
+                            {profile.error && (
+                              <span className="text-[10px] uppercase tracking-[0.25em] text-rose-300">
+                                {profile.error}
+                              </span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
