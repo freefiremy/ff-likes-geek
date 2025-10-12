@@ -7,8 +7,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
   like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
-  info: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0Lw=='],
-  infoPath: ['aW5mbz0='],
+  info: ['aHR0cHM6Ly9hcGkuYWxsb3JpZ2lucy53aW4vcmF3P3VybD0='],
+  infoPath: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0L2luZm89'],
 };
 
 const murkyLedger = {
@@ -103,7 +103,7 @@ export default function HomePage() {
   );
 
   const buildInfoUrl = useCallback(
-    (id) => `${infoEndpoint}${infoPath}${encodeURIComponent(id)}`,
+    (id) => `${infoEndpoint}${encodeURIComponent(`${infoPath}${id}`)}`,
     [infoEndpoint, infoPath],
   );
 

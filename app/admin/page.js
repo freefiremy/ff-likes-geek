@@ -42,8 +42,8 @@ const INITIAL_USERS = buildInitialUsersFromRegistry(ENCODED_REGISTRY);
 const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
   like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
-  info: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0Lw=='],
-  infoPath: ['aW5mbz0='],
+  info: ['aHR0cHM6Ly9hcGkuYWxsb3JpZ2lucy53aW4vcmF3P3VybD0='],
+  infoPath: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0L2luZm89'],
 };
 
 const DATE_FORMAT_OPTIONS = {
@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
   );
 
   const buildInfoUrl = useCallback(
-    (id) => `${infoEndpoint}${infoPath}${encodeURIComponent(id)}`,
+    (id) => `${infoEndpoint}${encodeURIComponent(`${infoPath}${id}`)}`,
     [infoEndpoint, infoPath],
   );
 
@@ -207,20 +207,29 @@ export default function AdminDashboardPage() {
 
   const fetchProfileStats = useCallback(
     async (uid) => {
-      const response = await fetch(buildInfoUrl(uid));
-      if (!response.ok) {
-        throw new Error(`Profile API responded with status ${response.status}`);
+      let lastError;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const response = await fetch(buildInfoUrl(uid));
+          if (!response.ok) {
+            throw new Error(`Profile API responded with status ${response.status}`);
+          }
+          const data = await response.json();
+          const likes = Number(data?.basicInfo?.liked);
+          const nickname = data?.basicInfo?.nickname;
+          const levelValue = Number(data?.basicInfo?.level);
+          return {
+            likes: Number.isFinite(likes) ? likes : null,
+            likesBefore: null,
+            nickname: typeof nickname === 'string' && nickname.trim() ? nickname : 'Unknown',
+            level: Number.isFinite(levelValue) ? levelValue : null,
+          };
+        } catch (error) {
+          lastError = error;
+          await new Promise((resolve) => setTimeout(resolve, 350));
+        }
       }
-      const data = await response.json();
-      const likes = Number(data?.basicInfo?.liked);
-      const nickname = data?.basicInfo?.nickname;
-      const levelValue = Number(data?.basicInfo?.level);
-      return {
-        likes: Number.isFinite(likes) ? likes : null,
-        likesBefore: null,
-        nickname: typeof nickname === 'string' && nickname.trim() ? nickname : 'Unknown',
-        level: Number.isFinite(levelValue) ? levelValue : null,
-      };
+      throw lastError instanceof Error ? lastError : new Error('Failed to load profile.');
     },
     [buildInfoUrl],
   );
@@ -245,30 +254,34 @@ export default function AdminDashboardPage() {
 
     async function loadProfiles() {
       try {
-        const results = await Promise.all(
-          usersState.map(async ({ uid }) => {
-            try {
-              const stats = await fetchProfileStats(uid);
-              return [uid, { ...stats, loading: false }];
-            } catch (error) {
-              return [
-                uid,
-                {
-                  likes: null,
-                  likesBefore: null,
-                  loading: false,
-                  error:
-                    error instanceof Error
-                      ? error.message
-                      : 'Unable to fetch profile data.',
-                },
-              ];
-            }
-          }),
-        );
+        const results = [];
+        for (const { uid } of usersState) {
+          if (ignore) {
+            return;
+          }
+          try {
+            const stats = await fetchProfileStats(uid);
+            results.push([uid, { ...stats, loading: false }]);
+          } catch (error) {
+            results.push([
+              uid,
+              {
+                likes: null,
+                likesBefore: null,
+                loading: false,
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : 'Unable to fetch profile data.',
+              },
+            ]);
+          }
+        }
+
         if (ignore) {
           return;
         }
+
         const resultsMap = Object.fromEntries(results);
         const next = {};
         usersState.forEach(({ uid }) => {
@@ -389,6 +402,19 @@ export default function AdminDashboardPage() {
       },
       { active: 0, expired: 0 },
     );
+  }, [users]);
+
+  const logScaleMeta = useMemo(() => {
+    const maxLikes = users.reduce((max, user) => {
+      const count = Number.isFinite(user.likeCount) ? user.likeCount : 0;
+      return Math.max(max, count);
+    }, 0);
+    const maxLog = Math.log10(maxLikes + 1);
+    return {
+      maxLog,
+      baseHeight: 48,
+      heightRange: 160,
+    };
   }, [users]);
 
   const handleRegisterUser = useCallback(
@@ -566,7 +592,6 @@ export default function AdminDashboardPage() {
                     <th className="py-3 pr-4">UID</th>
                     <th className="py-3 pr-4">Expiration</th>
                     <th className="py-3 pr-4">Status</th>
-                    <th className="py-3 pr-4">Money (LKR)</th>
                     <th className="py-3 pr-4">Likes</th>
                     <th className="py-3">Actions</th>
                   </tr>
@@ -599,9 +624,6 @@ export default function AdminDashboardPage() {
                             />
                             {user.status}
                           </span>
-                        </td>
-                        <td className="py-4 pr-4 font-mono text-sm text-slate-200">
-                          {currencyFormatter.format(user.money ?? 500)}
                         </td>
                         <td className="py-4 pr-4">
                           {isLoading ? (
@@ -661,8 +683,8 @@ export default function AdminDashboardPage() {
                         user.status === 'active' ? 'bg-emerald-400/60' : 'bg-rose-400/60'
                       } transition-transform group-hover:scale-[1.05]`}
                       style={{
-                        minHeight: '48px',
-                        height: `${Math.max(48, user.likeCount * 12 + 48)}px`,
+                        minHeight: `${logScaleMeta.baseHeight}px`,
+                        height: `${logScaleMeta.baseHeight + (logScaleMeta.maxLog > 0 ? (Math.log10((Number.isFinite(user.likeCount) ? user.likeCount : 0) + 1) / logScaleMeta.maxLog) * logScaleMeta.heightRange : 0)}px`,
                       }}
                       title={`UID ${user.uid} · ${user.status} · Likes ${user.likeCount}`}
                     >
@@ -694,3 +716,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+
