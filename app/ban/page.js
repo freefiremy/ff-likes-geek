@@ -4,6 +4,9 @@ import { useCallback, useState } from 'react';
 
 const API_ENDPOINT = 'http://87.106.82.84:13522/check';
 
+const UID_MIN_LENGTH = 8;
+const UID_MAX_LENGTH = 11;
+
 const statusStyles = {
   safe: 'border-emerald-400/60 bg-emerald-400/10 text-emerald-100',
   banned: 'border-rose-500/60 bg-rose-500/10 text-rose-100',
@@ -26,6 +29,7 @@ export default function BanCheckPage() {
   const [isChecking, setIsChecking] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(null);
+  const [submittedUid, setSubmittedUid] = useState('');
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -35,14 +39,23 @@ export default function BanCheckPage() {
       if (!trimmed) {
         setErrorMessage('Please enter a UID first.');
         setStatus(null);
+        setSubmittedUid('');
         return;
       }
       if (!/^\d+$/.test(trimmed)) {
         setErrorMessage('UID must contain digits only.');
         setStatus(null);
+        setSubmittedUid('');
+        return;
+      }
+      if (trimmed.length < UID_MIN_LENGTH || trimmed.length > UID_MAX_LENGTH) {
+        setErrorMessage(`UID must be between ${UID_MIN_LENGTH} and ${UID_MAX_LENGTH} digits.`);
+        setStatus(null);
+        setSubmittedUid('');
         return;
       }
 
+      setSubmittedUid(trimmed);
       setIsChecking(true);
       setErrorMessage('');
       setStatus(null);
@@ -58,6 +71,7 @@ export default function BanCheckPage() {
           throw new Error('The ban check API did not return a successful response.');
         }
         setStatus(normalizeStatus(data));
+        setUid('');
       } catch (error) {
         setErrorMessage(
           error instanceof Error
@@ -99,9 +113,12 @@ export default function BanCheckPage() {
               <input
                 type="text"
                 inputMode="numeric"
+                pattern="\d*"
                 placeholder="Enter UID"
                 value={uid}
                 onChange={(event) => setUid(event.target.value)}
+                maxLength={UID_MAX_LENGTH}
+                autoComplete="off"
                 className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-base font-semibold tracking-wide text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
               />
             </label>
@@ -137,7 +154,7 @@ export default function BanCheckPage() {
                 <Detail label="Nickname" value={status.name} />
                 <Detail label="Region" value={status.region} />
                 <Detail label="Ban period (days)" value={status.banPeriod ?? 0} />
-                <Detail label="UID" value={uid.trim()} />
+                <Detail label="UID" value={submittedUid || 'Unknown'} />
               </div>
             </div>
           )}
