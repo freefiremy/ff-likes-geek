@@ -7,8 +7,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
   like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
-  info: ['aHR0cHM6Ly9hcGku', 'YWxsb3JpZ2lucy53aW4=', 'L3Jhdz91cmw9'],
-  infoPath: ['aHR0cHM6Ly9ub2RlanMt', 'aW5mby52ZXJjZWVsLmFwcC8=', 'L2luZm8='],
+  info: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0Lw=='],
+  infoPath: ['aW5mbz0='],
 };
 
 const murkyLedger = {
@@ -103,7 +103,7 @@ export default function HomePage() {
   );
 
   const buildInfoUrl = useCallback(
-    (id) => `${infoEndpoint}${infoPath}?uid=${encodeURIComponent(id)}`,
+    (id) => `${infoEndpoint}${infoPath}${encodeURIComponent(id)}`,
     [infoEndpoint, infoPath],
   );
 
@@ -115,7 +115,8 @@ export default function HomePage() {
           return 'Unknown';
         }
         const data = await response.json();
-        return data?.response?.PlayerNickname || 'Unknown';
+        const nickname = data?.basicInfo?.nickname;
+        return typeof nickname === 'string' && nickname.trim() ? nickname : 'Unknown';
       } catch {
         return 'Unknown';
       }
