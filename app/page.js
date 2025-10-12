@@ -4,14 +4,14 @@ import { Buffer } from 'buffer';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const ENCODED_KEY = 'YXN0dXRlMmsz';
-const ENCODED_PARTS = {
+const gummyNimbus = 'YXN0dXRlMmsz';
+const sleepyTrails = {
   like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
   info: ['aHR0cHM6Ly9hcGku', 'YWxsb3JpZ2lucy53aW4=', 'L3Jhdz91cmw9'],
   infoPath: ['aHR0cHM6Ly9ub2RlanMt', 'aW5mby52ZXJjZWVsLmFwcC8=', 'L2luZm8='],
 };
 
-const ENCODED_REGISTRY = {
+const murkyLedger = {
   'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
   'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
   'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
@@ -80,13 +80,13 @@ export default function HomePage() {
   const [copyLabel, setCopyLabel] = useState('Copy Details');
   const [showTopButton, setShowTopButton] = useState(false);
 
-  const apiKey = useMemo(() => decodeBase64(ENCODED_KEY), []);
-  const likeEndpoint = useMemo(() => joinParts(ENCODED_PARTS.like), []);
-  const infoEndpoint = useMemo(() => joinParts(ENCODED_PARTS.info), []);
-  const infoPath = useMemo(() => joinParts(ENCODED_PARTS.infoPath), []);
+  const apiKey = useMemo(() => decodeBase64(gummyNimbus), []);
+  const likeEndpoint = useMemo(() => joinParts(sleepyTrails.like), []);
+  const infoEndpoint = useMemo(() => joinParts(sleepyTrails.info), []);
+  const infoPath = useMemo(() => joinParts(sleepyTrails.infoPath), []);
 
   const registry = useMemo(() => {
-    const entries = Object.entries(ENCODED_REGISTRY).map(([key, value]) => {
+    const entries = Object.entries(murkyLedger).map(([key, value]) => {
       const decodedKey = decodeBase64(key);
       const decodedValue = JSON.parse(decodeBase64(value));
       return [decodedKey, new Date(decodedValue.expiration)];
