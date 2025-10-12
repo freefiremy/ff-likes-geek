@@ -21,6 +21,9 @@ const shouldSkipClientNav = (event) =>
 
 export function NavBar() {
   const pathname = usePathname();
+  if (pathname === '/admin/login') {
+    return null;
+  }
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [navLinks, setNavLinks] = useState([
     ...BASE_NAV_LINKS,

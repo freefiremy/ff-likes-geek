@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -79,6 +80,32 @@ export default function AdminLoginPage() {
           <p className="text-sm text-slate-300">
             Enter the administrator password to manage registered users and likes.
           </p>
+          <nav className="flex justify-center gap-4 text-xs uppercase tracking-[0.35em] text-slate-400">
+            <Link
+              href="/"
+              className="transition-colors hover:text-slate-200"
+            >
+              Home
+            </Link>
+            <Link
+              href="/info"
+              className="transition-colors hover:text-slate-200"
+            >
+              Info
+            </Link>
+            <Link
+              href="/ban"
+              className="transition-colors hover:text-slate-200"
+            >
+              Ban Check
+            </Link>
+            <Link
+              href="/contact"
+              className="transition-colors hover:text-slate-200"
+            >
+              Contact
+            </Link>
+          </nav>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <label className="block text-sm font-medium text-slate-200/80">
@@ -105,11 +132,15 @@ export default function AdminLoginPage() {
           >
             {isSubmitting ? 'Verifying…' : 'Enter Dashboard'}
           </button>
+          <Link
+            href="/"
+            className="flex w-full justify-center rounded-full border border-white/20 bg-white/10 px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200 transition-colors hover:bg-white/15"
+          >
+            Exit Admin
+          </Link>
         </form>
-        <p className="mt-6 text-center text-xs text-slate-400">
-          Password is securely hashed on the client using SHA-256.
-        </p>
       </div>
     </div>
   );
 }
+
