@@ -9,7 +9,6 @@ const USER_STORAGE_KEY = 'ff-admin-users';
 const DEFAULT_MONEY = 500;
 
 const ENCODED_REGISTRY = {
-  'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
   'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
   'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
   'MjA1MjU4MDEzMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
@@ -625,8 +624,4 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-
-
-
 
