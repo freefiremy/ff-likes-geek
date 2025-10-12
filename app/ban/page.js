@@ -30,6 +30,10 @@ export default function BanCheckPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(null);
   const [submittedUid, setSubmittedUid] = useState('');
+  const handleUidChange = useCallback((event) => {
+    const digitsOnly = event.target.value.replace(/\D/g, '').slice(0, UID_MAX_LENGTH);
+    setUid(digitsOnly);
+  }, []);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -116,7 +120,7 @@ export default function BanCheckPage() {
                 pattern="\d*"
                 placeholder="Enter UID"
                 value={uid}
-                onChange={(event) => setUid(event.target.value)}
+                onChange={handleUidChange}
                 maxLength={UID_MAX_LENGTH}
                 autoComplete="off"
                 className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-base font-semibold tracking-wide text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-400/30"

@@ -46,6 +46,9 @@ const STATUS_STYLES = {
   error: 'border-rose-400/50 bg-rose-400/10 text-rose-100',
 };
 
+const UID_MIN_LENGTH = 8;
+const UID_MAX_LENGTH = 11;
+
 const decodeBase64 = (value) => {
   if (typeof window !== 'undefined' && typeof window.atob === 'function') {
     return window.atob(value);
@@ -155,6 +158,19 @@ export default function HomePage() {
         lines: ['The UID should contain digits only. Remove any spaces or letters and try again.'],
         copyText:
           'Invalid UID format. The UID should contain digits only. Remove any spaces or letters and try again.',
+      });
+      return;
+    }
+
+    if (trimmed.length < UID_MIN_LENGTH || trimmed.length > UID_MAX_LENGTH) {
+      setResult({
+        status: 'error',
+        title: 'Invalid UID length',
+        lines: [
+          `Enter a valid UID with ${UID_MIN_LENGTH}-${UID_MAX_LENGTH} digits.`,
+          'Double-check and try again.',
+        ],
+        copyText: `Invalid UID length. Enter a valid UID with ${UID_MIN_LENGTH}-${UID_MAX_LENGTH} digits.`,
       });
       return;
     }
@@ -274,6 +290,11 @@ export default function HomePage() {
     }
   }, [buildLikeUrl, fetchNickname, isSubmitting, registry, uid]);
 
+  const handleUidChange = useCallback((event) => {
+    const digitsOnly = event.target.value.replace(/\D/g, '').slice(0, UID_MAX_LENGTH);
+    setUid(digitsOnly);
+  }, []);
+
   const handleSubmit = useCallback(
     async (event) => {
       event.preventDefault();
@@ -315,9 +336,9 @@ export default function HomePage() {
                     type="text"
                     autoComplete="off"
                     className="w-full bg-transparent text-lg font-semibold tracking-wide text-slate-50 placeholder:text-slate-500 focus:outline-none"
-                    placeholder="e.g. 753524839"
+                    placeholder="Enter UID"
                     value={uid}
-                    onChange={(event) => setUid(event.target.value)}
+                    onChange={handleUidChange}
                     disabled={isSubmitting}
                   />
                 </div>
