@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -10,6 +10,35 @@ const NAV_LINKS = [
   { href: '/ban', label: 'Ban Check' },
   { href: '/contact', label: 'Contact' },
 ];
+
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+const normalizeHref = (href) => {
+  if (!href || href === '/') {
+    return '/';
+  }
+  return href.endsWith('/') ? href : `${href}/`;
+};
+
+const resolveHrefWithBase = (href) => {
+  const normalized = normalizeHref(href);
+  if (!basePath) {
+    return normalized;
+  }
+  if (normalized === '/') {
+    return `${basePath}/`;
+  }
+  const cleanedBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+  return `${cleanedBase}${normalized}`;
+};
+
+const shouldSkipClientNav = (event) =>
+  event.defaultPrevented ||
+  (typeof event.button === 'number' && event.button !== 0) ||
+  event.metaKey ||
+  event.altKey ||
+  event.ctrlKey ||
+  event.shiftKey;
 
 export function NavBar() {
   const pathname = usePathname();
@@ -29,6 +58,26 @@ export function NavBar() {
   };
 
   const activeLink = NAV_LINKS.find(({ href }) => isLinkActive(href));
+
+  const navigateWithReload = useCallback((href) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const target = resolveHrefWithBase(href);
+    window.location.assign(target);
+  }, []);
+
+  const createLinkHandler = useCallback(
+    (href) => (event) => {
+      if (shouldSkipClientNav(event)) {
+        return;
+      }
+      event.preventDefault();
+      setIsMenuOpen(false);
+      navigateWithReload(href);
+    },
+    [navigateWithReload],
+  );
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -94,44 +143,50 @@ export function NavBar() {
             <ul className="flex items-center gap-3">
               {leftLinks.map(({ href, label }) => {
                 const isActive = isLinkActive(href);
-                return (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      className={`rounded-full border-none px-5 py-2 text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-cyan-300 text-slate-950'
-                          : 'text-slate-200/70 hover:text-slate-100'
-                      } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
-                      aria-current={isActive ? 'page' : undefined}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                );
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    prefetch={false}
+                    className={`rounded-full border-none px-5 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-cyan-300 text-slate-950'
+                        : 'text-slate-200/70 hover:text-slate-100'
+                    } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={createLinkHandler(href)}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              );
               })}
             </ul>
-            {rightLink && (
-              <Link
-                href={rightLink.href}
-                className={`rounded-full border-none px-5 py-2 text-sm font-medium transition-colors ${
-                  isLinkActive(rightLink.href)
-                    ? 'bg-cyan-300 text-slate-950'
-                    : 'text-slate-200/70 hover:text-slate-100'
-                } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
-                aria-current={isLinkActive(rightLink.href) ? 'page' : undefined}
-              >
-                {rightLink.label}
-              </Link>
-            )}
-          </div>
+          {rightLink && (
+            <Link
+              href={rightLink.href}
+              prefetch={false}
+              className={`rounded-full border-none px-5 py-2 text-sm font-medium transition-colors ${
+                isLinkActive(rightLink.href)
+                  ? 'bg-cyan-300 text-slate-950'
+                  : 'text-slate-200/70 hover:text-slate-100'
+              } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
+              aria-current={isLinkActive(rightLink.href) ? 'page' : undefined}
+              onClick={createLinkHandler(rightLink.href)}
+            >
+              {rightLink.label}
+            </Link>
+          )}
+        </div>
 
           <div className="flex w-full items-center justify-between md:hidden">
             {activeLink ? (
               <Link
                 href={activeLink.href}
+                prefetch={false}
                 className="rounded-full px-5 py-2 text-sm font-medium transition-colors bg-cyan-300 text-slate-950 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none"
                 aria-current="page"
+                onClick={createLinkHandler(activeLink.href)}
               >
                 {activeLink.label}
               </Link>
@@ -183,6 +238,7 @@ export function NavBar() {
                   <li key={href}>
                     <Link
                       href={href}
+                      prefetch={false}
                       data-menu-item="true"
                       className={`block w-full rounded-full px-5 py-3 text-base font-medium transition-colors ${
                         isActive
@@ -190,7 +246,7 @@ export function NavBar() {
                           : 'text-slate-200/80 hover:text-slate-100'
                       } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
                       aria-current={isActive ? 'page' : undefined}
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={createLinkHandler(href)}
                     >
                       {label}
                     </Link>
