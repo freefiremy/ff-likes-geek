@@ -11,27 +11,6 @@ const NAV_LINKS = [
   { href: '/contact', label: 'Contact' },
 ];
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-
-const normalizeHref = (href) => {
-  if (!href || href === '/') {
-    return '/';
-  }
-  return href.endsWith('/') ? href : `${href}/`;
-};
-
-const resolveHrefWithBase = (href) => {
-  const normalized = normalizeHref(href);
-  if (!basePath) {
-    return normalized;
-  }
-  if (normalized === '/') {
-    return `${basePath}/`;
-  }
-  const cleanedBase = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-  return `${cleanedBase}${normalized}`;
-};
-
 const shouldSkipClientNav = (event) =>
   event.defaultPrevented ||
   (typeof event.button === 'number' && event.button !== 0) ||
@@ -59,22 +38,49 @@ export function NavBar() {
 
   const activeLink = NAV_LINKS.find(({ href }) => isLinkActive(href));
 
-  const navigateWithReload = useCallback((href) => {
+  const navigateWithReload = useCallback((targetHref) => {
     if (typeof window === 'undefined') {
       return;
     }
-    const target = resolveHrefWithBase(href);
-    window.location.assign(target);
+    window.location.assign(targetHref);
   }, []);
 
-  const createLinkHandler = useCallback(
-    (href) => (event) => {
+  const handleLinkClick = useCallback(
+    (event) => {
       if (shouldSkipClientNav(event)) {
         return;
       }
       event.preventDefault();
       setIsMenuOpen(false);
-      navigateWithReload(href);
+      if (event.currentTarget instanceof HTMLAnchorElement) {
+        const targetHref = event.currentTarget.href;
+        if (typeof window === 'undefined') {
+          return;
+        }
+        const currentUrl = new URL(window.location.href);
+        const parsedTarget = new URL(targetHref, currentUrl);
+        const knownSegments = NAV_LINKS.map(({ href }) =>
+          href.replace(/^\//, '').replace(/\/$/, ''),
+        );
+        const currentSegments = currentUrl.pathname.split('/').filter(Boolean);
+        const baseSegment =
+          currentSegments.length && !knownSegments.includes(currentSegments[0])
+            ? currentSegments[0]
+            : '';
+
+        if (
+          baseSegment &&
+          !parsedTarget.pathname.startsWith(`/${baseSegment}`) &&
+          parsedTarget.origin === currentUrl.origin
+        ) {
+          const normalizedPath = parsedTarget.pathname.startsWith('/')
+            ? parsedTarget.pathname
+            : `/${parsedTarget.pathname}`;
+          parsedTarget.pathname = `/${baseSegment}${normalizedPath}`;
+        }
+
+        navigateWithReload(parsedTarget.toString());
+      }
     },
     [navigateWithReload],
   );
@@ -152,9 +158,9 @@ export function NavBar() {
                       isActive
                         ? 'bg-cyan-300 text-slate-950'
                         : 'text-slate-200/70 hover:text-slate-100'
-                    } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
+                      } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
                     aria-current={isActive ? 'page' : undefined}
-                    onClick={createLinkHandler(href)}
+                    onClick={handleLinkClick}
                   >
                     {label}
                   </Link>
@@ -172,7 +178,7 @@ export function NavBar() {
                   : 'text-slate-200/70 hover:text-slate-100'
               } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
               aria-current={isLinkActive(rightLink.href) ? 'page' : undefined}
-              onClick={createLinkHandler(rightLink.href)}
+              onClick={handleLinkClick}
             >
               {rightLink.label}
             </Link>
@@ -186,7 +192,7 @@ export function NavBar() {
                 prefetch={false}
                 className="rounded-full px-5 py-2 text-sm font-medium transition-colors bg-cyan-300 text-slate-950 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none"
                 aria-current="page"
-                onClick={createLinkHandler(activeLink.href)}
+                onClick={handleLinkClick}
               >
                 {activeLink.label}
               </Link>
@@ -238,20 +244,20 @@ export function NavBar() {
                   <li key={href}>
                     <Link
                       href={href}
-                      prefetch={false}
-                      data-menu-item="true"
-                      className={`block w-full rounded-full px-5 py-3 text-base font-medium transition-colors ${
-                        isActive
-                          ? 'bg-cyan-300 text-slate-950'
-                          : 'text-slate-200/80 hover:text-slate-100'
+                    prefetch={false}
+                    data-menu-item="true"
+                    className={`block w-full rounded-full px-5 py-3 text-base font-medium transition-colors ${
+                      isActive
+                        ? 'bg-cyan-300 text-slate-950'
+                        : 'text-slate-200/80 hover:text-slate-100'
                       } focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 active:outline-none`}
-                      aria-current={isActive ? 'page' : undefined}
-                      onClick={createLinkHandler(href)}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                );
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={handleLinkClick}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              );
               })}
             </ul>
           </div>
