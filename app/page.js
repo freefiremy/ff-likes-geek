@@ -301,19 +301,6 @@ export default function HomePage() {
       <div className="pointer-events-none absolute -right-24 bottom-12 h-64 w-64 rounded-full bg-fuchsia-500/30 blur-3xl" />
 
       <div className="relative mx-auto flex w-full max-w-5xl flex-col gap-16 px-4 pb-40 pt-28">
-        <header id="home" className="scroll-mt-32 text-center">
-          <span className="text-xs uppercase tracking-[0.6em] text-cyan-300/80">
-            Premium Like Delivery
-          </span>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight text-slate-50 md:text-5xl">
-            GEEKS FF Likes Store
-          </h1>
-          <p className="mt-4 text-base text-slate-300 md:text-lg">
-            Boost your registered Free Fire profile with premium likes, stay on top of your renewal
-            date, and get in touch with the team in seconds.
-          </p>
-        </header>
-
         <main className="relative" id="info">
           <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-8 backdrop-blur-md md:px-12 md:py-12">
             <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_20%,rgba(56,189,248,0.18),transparent_55%),radial-gradient(circle_at_85%_15%,rgba(236,72,153,0.15),transparent_50%)]" />
@@ -348,6 +335,20 @@ export default function HomePage() {
                   Limited slots? We’ll let you know if you’ve hit today’s cap.
                 </p>
               </div>
+              {!result && (
+                <div className="space-y-3 rounded-2xl border border-white/10 bg-slate-950/50 px-6 py-5 text-center">
+                  <span className="text-xs uppercase tracking-[0.6em] text-cyan-300/80">
+                    Premium Like Delivery
+                  </span>
+                  <h2 className="text-2xl font-semibold text-slate-50 md:text-3xl">
+                    GEEKS FF Likes Store
+                  </h2>
+                  <p className="text-sm text-slate-300 md:text-base">
+                    Boost your registered Free Fire profile with premium likes, stay on top of your
+                    renewal date, and get in touch with the team in seconds.
+                  </p>
+                </div>
+              )}
             </form>
 
             <div className="relative mt-10 min-h-[160px]">
