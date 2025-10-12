@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const ADMIN_PASSWORD_HASH = 'bba246c355c6b4eb27137d69b3f24ce942820bc10d0d001dc610b95674c09da0';
@@ -21,6 +21,20 @@ async function hashPassword(value) {
 }
 
 export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-100">
+          <span className="text-sm text-slate-400">Loading…</span>
+        </div>
+      }
+    >
+      <AdminLoginContent />
+    </Suspense>
+  );
+}
+
+function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState('');
