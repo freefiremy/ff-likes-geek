@@ -107,7 +107,11 @@ function mergeStoredUsersWithBaseline(storedUsers, baselineUsers) {
     const override = storedMap.get(user.uid);
     if (override) {
       storedMap.delete(user.uid);
-      return { ...user, ...override };
+      return {
+        ...override,
+        expiration: user.expiration,
+        money: parseMoney(override.money ?? user.money),
+      };
     }
     return { ...user };
   });
