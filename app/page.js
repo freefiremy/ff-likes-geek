@@ -13,18 +13,18 @@ const sleepyTrails = {
 
 const murkyLedger = {
   'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'MjA1MjU4MDEzMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'Mjg3NDI5MDk2NQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'MjA1MjU4MDEzMg==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'Mjg3NDI5MDk2NQ==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
   'MTg5NTAyODg1NA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMC0xNVQxMjoyNzowMCswNTozMCJ9',
   'MzY1NDM2Njk2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0zMVQxOTo0MTowMCswNTozMCJ9',
   'NzUzNTI0ODM5': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0xMlQwMDowMDowMCswNTozMCJ9',
   'OTIzODI0NzQx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0zMFQwMDowMDowMCswNTozMCJ9',
   'NTE0NTY0NDc4Ng==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOS0wN1QwMDowMDowMCswNTozMCJ9',
   'MTkxODMwMTkxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wM1QwMDowMDowMCswNTozMCJ9',
-  'Mjg4MjQyNTI1': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNS0wMVQwMDowMDowMCswNTozMCJ9',
-  'MjEzODQxODg2OQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNS0wMVQwMDowMDowMCswNTozMCJ9',
+  'Mjg4MjQyNTI1': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'MjEzODQxODg2OQ==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
   'MTcxMDg4NDE0OA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MTcyMTAyODI4': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MjMyODExMTUzMw==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
@@ -33,7 +33,7 @@ const murkyLedger = {
   'MjExNDA2NDAxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MjkwOTg3NTcyNQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
   'MTQxOTQ2NjI3Mg==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
-  'MzI4MzEwODcxMg==': 'eyJleHBpcmF0aW9uIjoiMjAyOC0wNC0xNFQxMjowMDowMCswNTozMCJ9',
+  'MzI4MzEwODcxMg==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
   'MTE1MzE4NjE4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOS0xN1QwMDowMDowMCswNTozMCJ9',
   'MjYwNzQxMjE4MQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMC0yMFQwMDowMDowMCswNTozMCJ9',
   'MzA4OTAwNDcyNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0yMVQwMDowMDowMCswNTozMCJ9',
@@ -455,11 +455,11 @@ export default function HomePage() {
               </p>
             </Link>
             <Link
-              href="/ban"
+              href="/pricing"
               className="rounded-3xl border border-white/10 bg-slate-900/60 p-6 transition-colors hover:border-cyan-400/60 hover:bg-slate-900/70"
             >
-              <h2 className="text-lg font-semibold text-slate-50">Need to verify ban status?</h2>
-              <p className="mt-3">Head to the Ban Check tab to confirm whether an account is safe.</p>
+              <h2 className="text-lg font-semibold text-slate-50">Want more likes every day?</h2>
+              <p className="mt-3">Check out our pricing plans to send 100+ likes daily and outshine your crew.</p>
             </Link>
           </section>
         </main>

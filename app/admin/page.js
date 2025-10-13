@@ -9,18 +9,18 @@ const USER_STORAGE_KEY = 'ff-admin-users';
 const DEFAULT_MONEY = 500;
 
 const ENCODED_REGISTRY = {
-  'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'MjA1MjU4MDEzMg==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
-  'Mjg3NDI5MDk2NQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
+  'MjgwNTM2NTcwMg==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'MjUwNjE0OTg4MA==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'MjA1MjU4MDEzMg==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'Mjg3NDI5MDk2NQ==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
   'MTg5NTAyODg1NA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMC0xNVQxMjoyNzowMCswNTozMCJ9',
   'MzY1NDM2Njk2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0zMVQxOTo0MTowMCswNTozMCJ9',
   'NzUzNTI0ODM5': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0xMlQwMDowMDowMCswNTozMCJ9',
   'OTIzODI0NzQx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0zMFQwMDowMDowMCswNTozMCJ9',
   'NTE0NTY0NDc4Ng==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOS0wN1QwMDowMDowMCswNTozMCJ9',
   'MTkxODMwMTkxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wM1QwMDowMDowMCswNTozMCJ9',
-  'Mjg4MjQyNTI1': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNS0wMVQwMDowMDowMCswNTozMCJ9',
-  'MjEzODQxODg2OQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNS0wMVQwMDowMDowMCswNTozMCJ9',
+  'Mjg4MjQyNTI1': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
+  'MjEzODQxODg2OQ==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
   'MTcxMDg4NDE0OA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MTcyMTAyODI4': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MjMyODExMTUzMw==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
@@ -29,7 +29,7 @@ const ENCODED_REGISTRY = {
   'MjExNDA2NDAxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MjkwOTg3NTcyNQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
   'MTQxOTQ2NjI3Mg==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wNy0xMlQwMDowMDowMCswNTozMCJ9',
-  'MzI4MzEwODcxMg==': 'eyJleHBpcmF0aW9uIjoiMjAyOC0wNC0xNFQxMjowMDowMCswNTozMCJ9',
+  'MzI4MzEwODcxMg==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
   'MTE1MzE4NjE4MA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOS0xN1QwMDowMDowMCswNTozMCJ9',
   'MjYwNzQxMjE4MQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMC0yMFQwMDowMDowMCswNTozMCJ9',
   'MzA4OTAwNDcyNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0yMVQwMDowMDowMCswNTozMCJ9',
@@ -41,7 +41,9 @@ const INITIAL_USERS = buildInitialUsersFromRegistry(ENCODED_REGISTRY);
 const STATUS_STYLES = {
   active: 'bg-emerald-500/15 text-emerald-200 border-emerald-400/40',
   expired: 'bg-rose-500/15 text-rose-200 border-rose-400/40',
+  vip: 'bg-blue-500/15 text-blue-200 border-blue-400/40',
 };
+const STATUS_SEQUENCE = ['all', 'active', 'expired', 'vip'];
 
 function decodeBase64(value) {
   if (typeof window !== 'undefined' && typeof window.atob === 'function') {
@@ -124,7 +126,6 @@ export default function AdminDashboardPage() {
   const [usersState, setUsersState] = useState(INITIAL_USERS);
   const [statusFilter, setStatusFilter] = useState('all');
   const [isDaysLeftDescending, setIsDaysLeftDescending] = useState(true);
-
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -168,21 +169,27 @@ export default function AdminDashboardPage() {
       const daysLeft = isValidExpiration
         ? Math.max(0, Math.ceil((expirationTime - now) / (1000 * 60 * 60 * 24)))
         : 0;
+      const isVip = daysLeft > 1000;
       return {
         ...user,
         expirationDate,
         status: isExpired ? 'expired' : 'active',
         daysLeft,
+        isVip,
         money: parseMoney(user.money),
       };
     });
   }, [usersState]);
 
   const filteredUsers = useMemo(() => {
-    if (statusFilter === 'all') {
-      return users;
+    if (statusFilter === 'vip') {
+      return users.filter((user) => user.isVip);
     }
-    return users.filter((user) => user.status === statusFilter);
+    const nonVipUsers = users.filter((user) => !user.isVip);
+    if (statusFilter === 'all') {
+      return nonVipUsers;
+    }
+    return nonVipUsers.filter((user) => user.status === statusFilter);
   }, [statusFilter, users]);
 
   const sortedUsers = useMemo(() => {
@@ -196,7 +203,9 @@ export default function AdminDashboardPage() {
   const statusSummary = useMemo(() => {
     return users.reduce(
       (totals, user) => {
-        totals[user.status] += 1;
+        if (!user.isVip) {
+          totals[user.status] += 1;
+        }
         return totals;
       },
       { active: 0, expired: 0 },
@@ -276,15 +285,23 @@ export default function AdminDashboardPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setStatusFilter((previous) =>
-                            previous === 'all' ? 'active' : previous === 'active' ? 'expired' : 'all',
-                          )
+                          setStatusFilter((previous) => {
+                            const currentIndex = STATUS_SEQUENCE.indexOf(previous);
+                            const nextIndex = (currentIndex + 1) % STATUS_SEQUENCE.length;
+                            return STATUS_SEQUENCE[nextIndex];
+                          })
                         }
                         className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300 transition-colors hover:text-slate-100"
                       >
                         Status
                         {statusFilter !== 'all' && (
-                          <span className="text-[10px] uppercase text-cyan-300">({statusFilter})</span>
+                          <span className="text-[10px] uppercase text-cyan-300">
+                            (
+                            {statusFilter === 'vip'
+                              ? 'VIP'
+                              : statusFilter}
+                            )
+                          </span>
                         )}
                       </button>
                     </th>
@@ -301,17 +318,21 @@ export default function AdminDashboardPage() {
                         <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
                         <td className="py-4 pr-4 text-slate-300">{daysLeftLabel}</td>
                         <td className="py-4 pr-4">
-                          <span
+                      <span
                             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${
-                              STATUS_STYLES[user.status]
+                              STATUS_STYLES[user.isVip ? 'vip' : user.status]
                             }`}
                           >
                             <span
                               className={`h-2 w-2 rounded-full ${
-                                user.status === 'active' ? 'bg-emerald-400' : 'bg-rose-400'
+                                user.isVip
+                                  ? 'bg-blue-400'
+                                  : user.status === 'active'
+                                  ? 'bg-emerald-400'
+                                  : 'bg-rose-400'
                               }`}
                             />
-                            {user.status}
+                            {user.isVip ? 'VIP' : user.status}
                           </span>
                         </td>
                       </tr>
@@ -327,6 +348,7 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
 
 
 

@@ -37,7 +37,7 @@ If you host the project at `https://<user>.github.io/<repo>/`, update the `NEXT_
 - `app/`   App Router pages, layout, and Tailwind-powered UI. Includes dedicated routes:
   - `/`   Like sender dashboard and registry validator.
   - `/info`   UID profile lookup (level, ranks, XP, likes, last login).
-  - `/ban`   Ban status checker backed by the AlliFF ban API.
+  - `/pricing`   Like packages with multi-currency pricing.
   - `/contact`   Support & social channels.
 - `public/`   Static assets served at the root of the exported site.
 - `app/globals.css`   Tailwind directives plus minimal global tweaks.
@@ -47,5 +47,5 @@ If you host the project at `https://<user>.github.io/<repo>/`, update the `NEXT_
 ## Notes
 
 - Tailwind utility classes provide the primary styling. Custom gradients and layout tweaks live alongside the Tailwind layers inside `app/globals.css`.
-- Remote API calls and UID validation logic live inside their respective client components (`app/page.js`, `app/info/page.js`, `app/ban/page.js`).
+- Remote API calls and UID validation logic live inside their respective client components (`app/page.js`, `app/info/page.js`).
 - The build pipeline relies on `next build` with `output: 'export'`, so `next export` is no longer necessary.

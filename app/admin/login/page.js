@@ -108,10 +108,10 @@ function AdminLoginContent() {
               Info
             </Link>
             <Link
-              href="/ban"
+              href="/pricing"
               className="transition-colors hover:text-slate-200"
             >
-              Ban Check
+              Pricing
             </Link>
             <Link
               href="/contact"
