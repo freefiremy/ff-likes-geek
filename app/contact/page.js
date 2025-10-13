@@ -64,15 +64,85 @@ export default function ContactPage() {
         </section>
 
         <section className="rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-8 text-slate-300 backdrop-blur-md md:px-8">
-          <h2 className="text-lg font-semibold text-slate-100">Need a quick refresher?</h2>
+          <h2 className="text-lg font-semibold text-slate-100">
+            Boost Your Presence with Our Exclusive Like Packages
+          </h2>
           <p className="mt-3 text-sm leading-relaxed">
-            Registered players can check remaining days and like limits from the{' '}
-            <Link href="/" className="text-cyan-300 hover:text-cyan-200">
-              home dashboard
-            </Link>
-            . New players can use WhatsApp to share their UID and receive onboarding instructions in
-            minutes.
+            Unlock the potential to grow your social influence with our affordable and flexible Like
+            packages. Choose a package that suits your needs and see how much you can save compared
+            to regular rates. Plus, enjoy a money-back guarantee to ensure your satisfaction!
           </p>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              {
+                name: 'Starter Spark',
+                price: 'Rs. 500',
+                likes: '3,000',
+                savings: '[insert %]',
+                blurb: 'Perfect for getting started!',
+              },
+              {
+                name: 'Growth Accelerator',
+                price: 'Rs. 1,500',
+                likes: '10,000',
+                savings: '[insert %]',
+                blurb: 'Ideal for businesses or influencers looking to accelerate engagement.',
+              },
+              {
+                name: 'Momentum Builder',
+                price: 'Rs. 2,000',
+                likes: '15,000',
+                savings: '[insert %]',
+                blurb: 'A powerful boost for long-term growth.',
+              },
+              {
+                name: 'Power Surge',
+                price: 'Rs. 4,000',
+                likes: '37,000',
+                savings: '[insert %]',
+                blurb: 'For the serious influencer ready to dominate their niche.',
+              },
+            ].map((pkg) => (
+              <article
+                key={pkg.name}
+                className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 text-slate-200"
+              >
+                <h3 className="text-base font-semibold text-slate-50">{pkg.name}</h3>
+                <p className="mt-2 text-sm text-cyan-200">Price: {pkg.price}</p>
+                <p className="text-sm text-cyan-200">Likes: {pkg.likes}</p>
+                <p className="text-sm text-cyan-300">Save: {pkg.savings} off regular rates</p>
+                <p className="mt-2 text-xs text-slate-300">{pkg.blurb}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-6 grid gap-3 rounded-2xl border border-white/10 bg-slate-950/50 p-5">
+            <h3 className="text-base font-semibold text-slate-100">Why Choose Us?</h3>
+            <ul className="space-y-2 text-sm leading-relaxed text-slate-300">
+              <li>
+                <strong className="text-slate-100">Money-Back Guarantee:</strong> If you’re not
+                satisfied with our services, you’ll get your money back—no questions asked.
+              </li>
+              <li>
+                <strong className="text-slate-100">Reliable &amp; Fast Delivery:</strong> Get the
+                likes you need quickly, with no delays.
+              </li>
+              <li>
+                <strong className="text-slate-100">Save More:</strong> With each tier, you’re
+                getting better value and a higher number of likes at a much lower cost than the
+                regular market rate.
+              </li>
+              <li>
+                <strong className="text-slate-100">Transparency:</strong> You can always see how
+                much you’re saving compared to standard rates.
+              </li>
+            </ul>
+            <p className="text-xs text-slate-400">
+              Want to know which package is best for you? Reach out via WhatsApp and we’ll help you
+              choose the perfect fit.
+            </p>
+          </div>
         </section>
       </main>
     </div>
