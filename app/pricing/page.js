@@ -189,34 +189,59 @@ export default function PricingPage() {
           <h2 className="text-xl font-semibold text-slate-50 md:text-2xl">
             Compare Plans
           </h2>
-          <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-white/10 text-left text-sm text-slate-200">
-                <thead className="bg-slate-900/80 text-xs uppercase tracking-[0.3em] text-slate-400">
-                  <tr>
-                    <th className="px-4 py-3">Plan</th>
-                    <th className="px-4 py-3">Price</th>
-                    <th className="px-4 py-3">Likes</th>
-                    <th className="px-4 py-3">Savings</th>
-                    <th className="px-4 py-3">Best for</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10 bg-slate-900/60">
-                  {PLANS.map((plan) => (
-                    <tr key={plan.name} className="transition-colors hover:bg-slate-900/80">
-                      <td className="px-4 py-3 font-medium text-slate-50">{plan.name}</td>
-                      <td className="px-4 py-3 text-blue-300">
-                        {currencyMeta.format(plan.prices[currency])}
-                      </td>
-                      <td className="px-4 py-3">
-                        {plan.likes.toLocaleString('en-US')} likes / {plan.days} days
-                      </td>
-                      <td className="px-4 py-3">{plan.savings}</td>
-                      <td className="px-4 py-3 text-slate-300">{plan.target}</td>
+          <div className="mt-6 grid gap-4 md:hidden">
+            {PLANS.map((plan, index) => (
+              <article
+                key={plan.name}
+                className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-200"
+              >
+                <header className="flex items-center justify-between gap-4">
+                  <h3 className="text-base font-semibold text-slate-50">{plan.name}</h3>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-300">
+                    Plan {index + 1}
+                  </span>
+                </header>
+                <p className="mt-3 text-lg font-semibold text-blue-300">
+                  {currencyMeta.format(plan.prices[currency])}
+                </p>
+                <p className="text-xs text-slate-400">
+                  {plan.likes.toLocaleString('en-US')} likes / {plan.days} days
+                </p>
+                <p className="mt-3 text-xs text-slate-300">{plan.savings}</p>
+                <p className="mt-2 text-xs text-slate-400">{plan.target}</p>
+              </article>
+            ))}
+          </div>
+          <div className="hidden md:mt-6 md:block">
+            <div className="overflow-hidden rounded-2xl border border-white/10">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10 text-left text-sm text-slate-200">
+                  <thead className="bg-slate-900/80 text-xs uppercase tracking-[0.3em] text-slate-400">
+                    <tr>
+                      <th className="px-4 py-3">Plan</th>
+                      <th className="px-4 py-3">Price</th>
+                      <th className="px-4 py-3">Likes</th>
+                      <th className="px-4 py-3">Savings</th>
+                      <th className="px-4 py-3">Best for</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-white/10 bg-slate-900/60">
+                    {PLANS.map((plan) => (
+                      <tr key={plan.name} className="transition-colors hover:bg-slate-900/80">
+                        <td className="px-4 py-3 font-medium text-slate-50">{plan.name}</td>
+                        <td className="px-4 py-3 text-blue-300">
+                          {currencyMeta.format(plan.prices[currency])}
+                        </td>
+                        <td className="px-4 py-3">
+                          {plan.likes.toLocaleString('en-US')} likes / {plan.days} days
+                        </td>
+                        <td className="px-4 py-3">{plan.savings}</td>
+                        <td className="px-4 py-3 text-slate-300">{plan.target}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>

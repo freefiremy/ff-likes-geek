@@ -57,6 +57,18 @@ function parseMoney(value) {
   return Number.isFinite(numeric) ? numeric : DEFAULT_MONEY;
 }
 
+function formatExpirationDate(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return 'Unknown';
+  }
+
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 function buildInitialUsersFromRegistry(registry) {
   if (!registry || typeof registry !== 'object') {
     return [];
@@ -177,6 +189,7 @@ export default function AdminDashboardPage() {
       return {
         ...user,
         expirationDate,
+        isValidExpiration,
         status: isExpired ? 'expired' : 'active',
         daysLeft,
         isVip,
@@ -264,86 +277,134 @@ export default function AdminDashboardPage() {
               <div>
                 <h2 className="text-lg font-semibold text-slate-50">Registered Users</h2>
                 <p className="text-sm text-slate-400">
-                  Active: {statusSummary.active} · Expired: {statusSummary.expired}
+                  Active: {statusSummary.active} | Expired: {statusSummary.expired}
                 </p>
               </div>
             </div>
-
-
-            <div className="mt-6 overflow-x-auto">
-              <table className="min-w-full divide-y divide-white/5 text-left text-sm">
-                <thead className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                  <tr>
-                    <th className="py-3 pr-4">UID</th>
-                    <th className="py-3 pr-4">
-                      <button
-                        type="button"
-                        onClick={() => setIsDaysLeftDescending((previous) => !previous)}
-                        className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300 transition-colors hover:text-slate-100"
-                      >
-                        Days Left
-                        <span aria-hidden="true">{isDaysLeftDescending ? '↓' : '↑'}</span>
-                      </button>
-                    </th>
-                    <th className="py-3 pr-4">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setStatusFilter((previous) => {
-                            const currentIndex = STATUS_SEQUENCE.indexOf(previous);
-                            const nextIndex = (currentIndex + 1) % STATUS_SEQUENCE.length;
-                            return STATUS_SEQUENCE[nextIndex];
-                          })
-                        }
-                        className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300 transition-colors hover:text-slate-100"
-                      >
-                        Status
-                        {statusFilter !== 'all' && (
-                          <span className="text-[10px] uppercase text-cyan-300">
-                            (
-                            {statusFilter === 'vip'
-                              ? 'VIP'
-                              : statusFilter}
-                            )
-                          </span>
-                        )}
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5 text-sm">
-                  {sortedUsers.map((user) => {
-                    const daysLeftLabel =
-                      user.daysLeft > 0
-                        ? `${user.daysLeft} day${user.daysLeft === 1 ? '' : 's'}`
-                        : 'Expired';
-                    return (
-                      <tr key={user.uid}>
-                        <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
-                        <td className="py-4 pr-4 text-slate-300">{daysLeftLabel}</td>
-                        <td className="py-4 pr-4">
+            <div className="mt-6 grid gap-4 sm:hidden">
+              {sortedUsers.map((user) => {
+                const statusKey = user.isVip ? 'vip' : user.status;
+                const statusClasses = STATUS_STYLES[statusKey];
+                const daysLeftLabel =
+                  user.daysLeft > 0
+                    ? `${user.daysLeft} day${user.daysLeft === 1 ? '' : 's'}`
+                    : 'Expired';
+                const expirationLabel = formatExpirationDate(user.expirationDate);
+                return (
+                  <article
+                    key={user.uid}
+                    className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-mono text-base font-semibold text-slate-100">
+                        {user.uid}
+                      </span>
                       <span
-                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${
-                              STATUS_STYLES[user.isVip ? 'vip' : user.status]
-                            }`}
-                          >
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ${statusClasses}`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            user.isVip
+                              ? 'bg-blue-400'
+                              : user.status === 'active'
+                              ? 'bg-emerald-400'
+                              : 'bg-rose-400'
+                          }`}
+                        />
+                        {user.isVip ? 'VIP' : user.status}
+                      </span>
+                    </div>
+                    <dl className="mt-3 space-y-2 text-xs text-slate-400">
+                      <div className="flex items-center justify-between">
+                        <dt className="uppercase tracking-[0.25em] text-slate-400">Days left</dt>
+                        <dd className="text-sm font-semibold text-slate-100">{daysLeftLabel}</dd>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <dt className="uppercase tracking-[0.25em] text-slate-400">Expires</dt>
+                        <dd className="text-sm font-semibold text-slate-100">{expirationLabel}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="hidden sm:mt-6 sm:block">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/5 text-left text-sm">
+                  <thead className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                    <tr>
+                      <th className="py-3 pr-4">UID</th>
+                      <th className="py-3 pr-4">
+                        <button
+                          type="button"
+                          onClick={() => setIsDaysLeftDescending((previous) => !previous)}
+                          className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300 transition-colors hover:text-slate-100"
+                        >
+                          Days Left
+                          <span aria-hidden="true">{isDaysLeftDescending ? '↓' : '↑'}</span>
+                        </button>
+                      </th>
+                      <th className="py-3 pr-4">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setStatusFilter((previous) => {
+                              const currentIndex = STATUS_SEQUENCE.indexOf(previous);
+                              const nextIndex = (currentIndex + 1) % STATUS_SEQUENCE.length;
+                              return STATUS_SEQUENCE[nextIndex];
+                            })
+                          }
+                          className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300 transition-colors hover:text-slate-100"
+                        >
+                          Status
+                          {statusFilter !== 'all' && (
+                            <span className="text-[10px] uppercase text-cyan-300">
+                              (
+                              {statusFilter === 'vip'
+                                ? 'VIP'
+                                : statusFilter}
+                              )
+                            </span>
+                          )}
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-sm">
+                    {sortedUsers.map((user) => {
+                      const daysLeftLabel =
+                        user.daysLeft > 0
+                          ? `${user.daysLeft} day${user.daysLeft === 1 ? '' : 's'}`
+                          : 'Expired';
+                      return (
+                        <tr key={user.uid}>
+                          <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
+                          <td className="py-4 pr-4 text-slate-300">{daysLeftLabel}</td>
+                          <td className="py-4 pr-4">
                             <span
-                              className={`h-2 w-2 rounded-full ${
-                                user.isVip
-                                  ? 'bg-blue-400'
-                                  : user.status === 'active'
-                                  ? 'bg-emerald-400'
-                                  : 'bg-rose-400'
+                              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${
+                                STATUS_STYLES[user.isVip ? 'vip' : user.status]
                               }`}
-                            />
-                            {user.isVip ? 'VIP' : user.status}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                            >
+                              <span
+                                className={`h-2 w-2 rounded-full ${
+                                  user.isVip
+                                    ? 'bg-blue-400'
+                                    : user.status === 'active'
+                                    ? 'bg-emerald-400'
+                                    : 'bg-rose-400'
+                                }`}
+                              />
+                              {user.isVip ? 'VIP' : user.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
