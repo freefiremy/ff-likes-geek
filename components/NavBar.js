@@ -21,7 +21,7 @@ const shouldSkipClientNav = (event) =>
 
 export function NavBar() {
   const pathname = usePathname();
-  if (pathname === '/admin/login') {
+  if (pathname === '/admin/login' || pathname?.startsWith('/system/recovery')) {
     return null;
   }
   const [isMenuOpen, setIsMenuOpen] = useState(false);

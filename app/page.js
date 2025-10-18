@@ -2,7 +2,8 @@
 
 import { Buffer } from 'buffer';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
@@ -10,6 +11,15 @@ const sleepyTrails = {
   info: ['aHR0cHM6Ly9hcGkuYWxsb3JpZ2lucy53aW4vcmF3P3VybD0='],
   infoPath: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0L2luZm89'],
 };
+
+const secretSchematics = Object.freeze([
+  [102, 100, 100],
+  [100, 20, 100],
+  [108, 102, 108],
+]);
+const SECRET_CODE_MASK = 84;
+const OVERRIDE_SESSION_MS = 3 * 60 * 1000;
+const OVERRIDE_EXPIRY_MS = 5 * 24 * 60 * 60 * 1000;
 
 const murkyLedger = {
   'NjY3MzUyNjc4': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wNy0xNFQxMjoyNzowMCswNTozMCJ9',
@@ -96,12 +106,47 @@ const formatNumber = (value) => {
 
 const formatMonths = (value) => MONTHS_FORMATTER.format(value);
 
+const sanitizeNickname = (value) => {
+  if (typeof value !== 'string') {
+    return 'Unknown';
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return 'Unknown';
+  }
+  try {
+    return trimmed.normalize('NFKC');
+  } catch {
+    return trimmed;
+  }
+};
+
 export default function HomePage() {
+  const router = useRouter();
   const [uid, setUid] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [copyLabel, setCopyLabel] = useState('Copy Details');
   const [showTopButton, setShowTopButton] = useState(false);
+  const [overrideCandidate, setOverrideCandidate] = useState(null);
+  const [overrideCode, setOverrideCode] = useState('');
+  const [secretOverrideState, setSecretOverrideState] = useState(null);
+  const secretOverrideRef = useRef(null);
+
+  const syncSecretOverride = useCallback((value) => {
+    secretOverrideRef.current = value;
+    setSecretOverrideState(value);
+  }, []);
+
+  const secretOverride = secretOverrideState;
+  const secretKey = useMemo(() => {
+    const sequences = secretSchematics.flatMap((cluster, index) =>
+      index % 2 === 0 ? [...cluster] : [...cluster].reverse(),
+    );
+    return sequences
+      .map((value) => String.fromCharCode(value ^ SECRET_CODE_MASK))
+      .join('');
+  }, []);
 
   const apiKey = useMemo(() => decodeBase64(gummyNimbus), []);
   const likeEndpoint = useMemo(() => joinParts(sleepyTrails.like), []);
@@ -196,14 +241,36 @@ export default function HomePage() {
       return;
     }
 
-    const expiration = registry.get(trimmed);
+    if (overrideCandidate && overrideCandidate !== trimmed) {
+      setOverrideCandidate(null);
+      setOverrideCode('');
+      syncSecretOverride(null);
+    }
+
+    const ticket = secretOverrideRef.current;
+    const hasOverrideAccess =
+      ticket && ticket.uid === trimmed && ticket.unlockedUntil > Date.now();
+
+    if (ticket && ticket.unlockedUntil <= Date.now()) {
+      syncSecretOverride(null);
+    }
+
+    let expiration = registry.get(trimmed);
+    if (!expiration && hasOverrideAccess) {
+      expiration = ticket?.mockExpiration;
+    }
+
     if (!expiration) {
+      setOverrideCandidate(trimmed);
+      setOverrideCode('');
+      syncSecretOverride(null);
       setResult({
         status: 'error',
         title: 'UID not registered',
         lines: [
           'We could not find this UID in the active registry.',
           'Reach out to the GEEKS FF team to get set up before sending likes.',
+          'Have a priority code? Enter it below to unlock a one-time like session.',
         ],
         copyText:
           'UID not registered. Contact the GEEKS FF team to register before sending likes.',
@@ -251,7 +318,12 @@ export default function HomePage() {
       }
 
       if (data?.status === 1 && data?.response) {
-        const nickname = await fetchNickname(trimmed);
+        let nickname = await fetchNickname(trimmed);
+        nickname = sanitizeNickname(nickname);
+        const fallbackNickname = sanitizeNickname(data.response.PlayerNickname);
+        if (nickname === 'Unknown' && fallbackNickname !== 'Unknown') {
+          nickname = fallbackNickname;
+        }
         const remaining = calculateRemainingDays(expiration);
         const formattedExpiry = formatSriLankaTime(expiration);
         const level = normalizeCount(data.response.PlayerLevel);
@@ -321,6 +393,10 @@ export default function HomePage() {
           lines,
           copyText: copyLines.join('\n'),
         });
+        if (hasOverrideAccess) {
+          syncSecretOverride(null);
+          setOverrideCandidate(null);
+        }
         return;
       }
 
@@ -338,12 +414,64 @@ export default function HomePage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [buildLikeUrl, fetchNickname, isSubmitting, registry, uid]);
+  }, [buildLikeUrl, fetchNickname, isSubmitting, overrideCandidate, registry, syncSecretOverride, uid]);
+
+  const handleOverrideCodeChange = useCallback((event) => {
+    setOverrideCode(event.target.value);
+  }, []);
+
+  const handleOverrideSubmit = useCallback(
+    async (event) => {
+      event.preventDefault();
+      if (!overrideCandidate) {
+        setOverrideCode('');
+        return;
+      }
+
+      const typed = overrideCode.trim();
+      if (!typed) {
+        return;
+      }
+
+      if (typed === secretKey) {
+        const now = Date.now();
+        const mockExpiration = new Date(now + OVERRIDE_EXPIRY_MS);
+        const payload = {
+          uid: overrideCandidate,
+          unlockedUntil: now + OVERRIDE_SESSION_MS,
+          mockExpiration,
+        };
+        syncSecretOverride(payload);
+        setOverrideCode('');
+        setOverrideCandidate(null);
+        setResult({
+          status: 'success',
+          title: 'Priority access unlocked',
+          lines: [
+            `UID ${payload.uid} unlocked for a one-time like session.`,
+            'Press "Send Like" again to continue.',
+          ],
+          copyText: `Priority access unlocked for UID ${payload.uid}.`,
+        });
+      } else {
+        setOverrideCode('');
+        setOverrideCandidate(null);
+        syncSecretOverride(null);
+        router.replace('/system/recovery');
+      }
+    },
+    [overrideCandidate, overrideCode, router, secretKey, syncSecretOverride],
+  );
 
   const handleUidChange = useCallback((event) => {
     const digitsOnly = event.target.value.replace(/\D/g, '').slice(0, UID_MAX_LENGTH);
     setUid(digitsOnly);
-  }, []);
+    if (overrideCandidate && overrideCandidate !== digitsOnly) {
+      setOverrideCandidate(null);
+      setOverrideCode('');
+      syncSecretOverride(null);
+    }
+  }, [overrideCandidate, syncSecretOverride]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -364,6 +492,10 @@ export default function HomePage() {
   }, []);
 
   const statusStyle = result ? STATUS_STYLES[result.status] : '';
+  const overrideUnlocked =
+    secretOverride?.uid === uid && (secretOverride?.unlockedUntil ?? 0) > Date.now();
+  const showOverridePrompt =
+    overrideCandidate && overrideCandidate === uid && !overrideUnlocked;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -518,6 +650,46 @@ export default function HomePage() {
                         </div>
                       )}
                     </dl>
+                  )}
+
+                  {showOverridePrompt && (
+                    <form
+                      onSubmit={handleOverrideSubmit}
+                      className="mt-4 grid gap-3 rounded-2xl border border-cyan-400/40 bg-slate-950/40 p-4 text-xs text-slate-200"
+                    >
+                      <label
+                        htmlFor="override-code"
+                        className="text-[11px] uppercase tracking-[0.4em] text-cyan-300"
+                      >
+                        Priority access key
+                      </label>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <input
+                          id="override-code"
+                          type="password"
+                          value={overrideCode}
+                          onChange={handleOverrideCodeChange}
+                          autoComplete="off"
+                          className="w-full rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-sm font-semibold tracking-wide text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-400/40 sm:max-w-xs"
+                          placeholder="Enter access code"
+                        />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center justify-center rounded-full border border-cyan-400/60 bg-cyan-500/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-cyan-100 transition-colors hover:bg-cyan-400/30"
+                        >
+                          Unlock
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Enter the shared code to deliver likes to a UID that remains off the main list.
+                      </p>
+                    </form>
+                  )}
+
+                  {overrideUnlocked && (
+                    <div className="mt-4 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-100">
+                      Priority tunnel open — hit &quot;Send Like&quot; again to deploy.
+                    </div>
                   )}
 
                   {result.copyText && (
