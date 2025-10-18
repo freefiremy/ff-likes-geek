@@ -48,6 +48,8 @@ const STATUS_STYLES = {
 
 const UID_MIN_LENGTH = 8;
 const UID_MAX_LENGTH = 11;
+const LIKES_GOAL = 100000;
+const MONTHS_FORMATTER = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
 const decodeBase64 = (value) => {
   if (typeof window !== 'undefined' && typeof window.atob === 'function') {
@@ -75,6 +77,24 @@ const calculateRemainingDays = (expiration) => {
   const diff = expiration.getTime() - now;
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
+
+const normalizeCount = (value) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+};
+
+const formatNumber = (value) => {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) {
+    return numeric.toLocaleString('en-US');
+  }
+  if (typeof value === 'string' && value.trim()) {
+    return value;
+  }
+  return '—';
+};
+
+const formatMonths = (value) => MONTHS_FORMATTER.format(value);
 
 export default function HomePage() {
   const [uid, setUid] = useState('');
@@ -234,42 +254,71 @@ export default function HomePage() {
         const nickname = await fetchNickname(trimmed);
         const remaining = calculateRemainingDays(expiration);
         const formattedExpiry = formatSriLankaTime(expiration);
+        const level = normalizeCount(data.response.PlayerLevel);
+        const likesBefore = normalizeCount(data.response.LikesbeforeCommand);
+        const likesAfter = normalizeCount(data.response.LikesafterCommand);
+        const likesGiven = normalizeCount(data.response.LikesGivenByAPI);
+        const likesNeeded = Math.max(0, LIKES_GOAL - likesAfter);
+        const estimatedMonthsRaw = likesNeeded > 0 ? likesNeeded / 3000 : 0;
+        const estimatedMonths = likesNeeded > 0 ? Math.max(estimatedMonthsRaw, 0.01) : 0;
+        const levelLabel = formatNumber(level);
+        const likesBeforeLabel = formatNumber(likesBefore);
+        const likesAfterLabel = formatNumber(likesAfter);
+        const likesGivenLabel = formatNumber(likesGiven);
+        const likesNeededLabel = likesNeeded > 0 ? formatNumber(likesNeeded) : null;
+        const estimatedMonthsLabel =
+          likesNeeded > 0 ? formatMonths(estimatedMonths) : null;
+
         const details = {
           nickname,
           uid: data.response.UID,
-          level: data.response.PlayerLevel,
-          likesGiven: data.response.LikesGivenByAPI,
-          likesBefore: data.response.LikesbeforeCommand,
-          likesAfter: data.response.LikesafterCommand,
+          level,
+          levelLabel,
+          likesGiven,
+          likesGivenLabel,
+          likesBefore,
+          likesBeforeLabel,
+          likesAfter,
+          likesAfterLabel,
+          likesNeeded,
+          likesNeededLabel,
+          estimatedMonths,
+          estimatedMonthsLabel,
           remaining,
           expires: formattedExpiry,
         };
 
-        const copyLines = [
-          'Like sent successfully!',
+        const baseLines = [
           `Player: ${details.nickname}`,
           `UID: ${details.uid}`,
-          `Level: ${details.level}`,
-          `Likes before command: ${details.likesBefore}`,
-          `Likes after command: ${details.likesAfter}`,
-          `Likes recorded for this command: ${details.likesGiven}`,
+          `Level: ${details.levelLabel}`,
+          `Likes before command: ${details.likesBeforeLabel}`,
+          `Likes after command: ${details.likesAfterLabel}`,
+          `Likes recorded for this command: ${details.likesGivenLabel}`,
           `Days remaining: ${details.remaining}`,
           `Registration expires: ${details.expires}`,
         ];
+
+        const motivationLines = [];
+        if (details.likesNeeded > 0) {
+          const neededLabel = details.likesNeededLabel ?? formatNumber(details.likesNeeded);
+          const monthsLabel =
+            details.estimatedMonthsLabel ?? formatMonths(details.estimatedMonths);
+          motivationLines.push(
+            `${neededLabel} more likes needed to reach 100,000.`,
+            `You can achieve it in about ${monthsLabel} months at 3,000 likes per month.`,
+            'Stay connected with us!',
+          );
+        }
+
+        const lines = [...baseLines, ...motivationLines];
+        const copyLines = ['Like sent successfully!', ...lines];
 
         setResult({
           status: 'success',
           title: 'Like sent successfully!',
           details,
-          lines: [
-            `Player: ${details.nickname}`,
-            `UID: ${details.uid}`,
-            `Level: ${details.level}`,
-            `Likes recorded this time: ${details.likesGiven}`,
-            `Before ➜ After: ${details.likesBefore} ➜ ${details.likesAfter}`,
-            `Days remaining: ${details.remaining}`,
-            `Registration expires: ${details.expires}`,
-          ],
+          lines,
           copyText: copyLines.join('\n'),
         });
         return;
@@ -395,7 +444,7 @@ export default function HomePage() {
                   </ul>
 
                   {result.details && (
-                    <dl className="grid grid-cols-1 gap-3 text-sm text-slate-100/80 sm:grid-cols-2">
+                    <dl className="grid grid-cols-1 gap-3 text-sm text-slate-100/80 sm:grid-cols-2 md:grid-cols-3">
                       <div>
                         <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">Player</dt>
                         <dd className="mt-1 font-medium text-slate-100">{result.details.nickname}</dd>
@@ -406,16 +455,68 @@ export default function HomePage() {
                       </div>
                       <div>
                         <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">Level</dt>
-                        <dd className="mt-1 font-medium text-slate-100">{result.details.level}</dd>
+                        <dd className="mt-1 font-medium text-slate-100">
+                          {result.details.levelLabel ?? formatNumber(result.details.level)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                          Likes before command
+                        </dt>
+                        <dd className="mt-1 font-medium text-slate-100">
+                          {result.details.likesBeforeLabel ?? formatNumber(result.details.likesBefore)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                          Likes after command
+                        </dt>
+                        <dd className="mt-1 font-medium text-slate-100">
+                          {result.details.likesAfterLabel ?? formatNumber(result.details.likesAfter)}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
                           Likes recorded
                         </dt>
                         <dd className="mt-1 font-medium text-slate-100">
-                          {result.details.likesGiven}
+                          {result.details.likesGivenLabel ?? formatNumber(result.details.likesGiven)}
                         </dd>
                       </div>
+                      <div>
+                        <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                          Days remaining
+                        </dt>
+                        <dd className="mt-1 font-medium text-slate-100">{result.details.remaining}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                          Registration expires
+                        </dt>
+                        <dd className="mt-1 font-medium text-slate-100">{result.details.expires}</dd>
+                      </div>
+                      {result.details.likesNeeded > 0 && (
+                        <div>
+                          <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                            Likes to 100K
+                          </dt>
+                          <dd className="mt-1 font-medium text-slate-100">
+                            {result.details.likesNeededLabel ??
+                              formatNumber(result.details.likesNeeded)}
+                          </dd>
+                        </div>
+                      )}
+                      {result.details.likesNeeded > 0 && (
+                        <div>
+                          <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                            Estimated months (3k/mo)
+                          </dt>
+                          <dd className="mt-1 font-medium text-slate-100">
+                            {result.details.estimatedMonthsLabel ??
+                              formatMonths(result.details.estimatedMonths)}
+                          </dd>
+                        </div>
+                      )}
                     </dl>
                   )}
 
