@@ -134,6 +134,23 @@ const formatNumber = (value) => {
 
 const formatMonths = (value) => MONTHS_FORMATTER.format(value);
 
+const sanitizeNickname = (value) => {
+  if (value == null) {
+    return 'Unknown';
+  }
+  const input = String(value).trim();
+  if (!input) {
+    return 'Unknown';
+  }
+  try {
+    const normalized = input.normalize('NFKC').replace(/[\u0000-\u001F\u007F-\u009F]+/g, '').trim();
+    return normalized || 'Unknown';
+  } catch {
+    const cleaned = input.replace(/[\u0000-\u001F\u007F-\u009F]+/g, '').trim();
+    return cleaned || 'Unknown';
+  }
+};
+
 const buildProjection = (likesCurrent, dailyRateEstimate = null) => {
   const safeLikes = Math.max(0, Number.isFinite(likesCurrent) ? likesCurrent : 0);
   const targetLikes = safeLikes >= LIKES_GOAL ? 1000000 : LIKES_GOAL;
