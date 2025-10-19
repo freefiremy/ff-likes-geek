@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
   like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
+  info: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0Lw=='],
+  infoPath: ['aW5mbz0='],
 };
 
 const secretSchematics = Object.freeze([
@@ -193,7 +195,8 @@ export default function HomePage() {
 
   const apiKey = useMemo(() => decodeBase64(gummyNimbus), []);
   const likeEndpoint = useMemo(() => joinParts(sleepyTrails.like), []);
-  const infoProxyEndpoint = useMemo(() => '/api/profile/', []);
+  const infoEndpoint = useMemo(() => joinParts(sleepyTrails.info), []);
+  const infoPath = useMemo(() => joinParts(sleepyTrails.infoPath), []);
 
   const registry = useMemo(() => {
     const entries = Object.entries(murkyLedger).map(([key, value]) => {
@@ -210,8 +213,8 @@ export default function HomePage() {
   );
 
   const buildInfoUrl = useCallback(
-    (id) => `${infoProxyEndpoint}${encodeURIComponent(id)}`,
-    [infoProxyEndpoint],
+    (id) => `${infoEndpoint}${infoPath}${id}`,
+    [infoEndpoint, infoPath],
   );
 
   const fetchProfileSnapshot = useCallback(
