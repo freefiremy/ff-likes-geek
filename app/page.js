@@ -164,7 +164,7 @@ const buildProjection = (likesCurrent, dailyRateEstimate = null) => {
   const avgMonths = likesRemaining > 0 ? likesRemaining / baselineMonthlyRate : 0;
 
   const resolvedDailyRate =
-    dailyRateEstimate && Number.isFinite(dailyRateEstimate) && dailyRateEstimate > 0
+    Number.isFinite(dailyRateEstimate) && dailyRateEstimate > 0
       ? dailyRateEstimate
       : baselineDailyRate;
   const actualDaysToTarget = likesRemaining > 0 ? likesRemaining / resolvedDailyRate : 0;
