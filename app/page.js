@@ -322,19 +322,9 @@ export default function HomePage() {
       const lines = [
         'We could not find this UID in the active registry.',
         'Reach out to the GEEKS FF team to get set up before sending likes.',
-        `Current likes (profile lookup): ${formatNumber(currentLikes)}`,
       ];
 
-      if (projection.likesRemainingToTarget > 0) {
-        const targetLabel = formatNumber(projection.targetLikes);
-        const neededLabel = formatNumber(projection.likesRemainingToTarget);
-        const monthsLabel = projection.avgMonthsLabel ?? formatMonths(projection.avgMonths);
-        lines.push(
-          `Likes Needed for ${targetLabel} Likes: ${neededLabel}`,
-          `Months needed for ${targetLabel} Likes: ${monthsLabel} (avg 3000/month)`,
-          'Stay connected with us!',
-        );
-      } else {
+      if (projection.likesRemainingToTarget <= 0) {
         lines.push('Milestone already achieved—keep stacking the streak!');
       }
 
@@ -388,8 +378,6 @@ export default function HomePage() {
         const currentLikes =
           snapshot && Number.isFinite(snapshot.likes) ? snapshot.likes : 0;
         const projection = buildProjection(currentLikes, BASELINE_DAILY_RATE);
-
-        lines.push(`Current likes (profile lookup): ${formatNumber(currentLikes)}`);
 
         setResult({
           status: 'warning',

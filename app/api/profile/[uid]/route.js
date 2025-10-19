@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 const INFO_BASE = Buffer.from('aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0Lw==', 'base64').toString('utf-8');
 const INFO_PATH = Buffer.from('aW5mbz0=', 'base64').toString('utf-8');
 
