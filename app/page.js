@@ -8,8 +8,8 @@ import { useRouter } from 'next/navigation';
 const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
   like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
-  info: ['aHR0cHM6Ly9hcGkuYWxsb3JpZ2lucy53aW4vcmF3P3VybD0='],
-  infoPath: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0L2luZm89'],
+  info: ['L2FwaS9pbmZv'], // base64 for '/api/info'
+  infoPath: ['aW5mbz0='],
 };
 
 const secretSchematics = Object.freeze([
@@ -59,6 +59,8 @@ const STATUS_STYLES = {
 const UID_MIN_LENGTH = 8;
 const UID_MAX_LENGTH = 11;
 const LIKES_GOAL = 100000;
+const BASELINE_DAILY_RATE = 100;
+const BASELINE_MONTHLY_RATE = 3000;
 const MONTHS_FORMATTER = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
 const decodeBase64 = (value) => {
@@ -88,6 +90,32 @@ const calculateRemainingDays = (expiration) => {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
 
+const formatDayCount = (days) => {
+  if (!Number.isFinite(days) || days < 0) {
+    return 'Already there';
+  }
+  if (days === 0) {
+    return 'Already there';
+  }
+  if (days < 1) {
+    return 'Less than a day';
+  }
+  if (days < 7) {
+    const rounded = Math.ceil(days);
+    return `${rounded} day${rounded === 1 ? '' : 's'}`;
+  }
+  const weeks = days / 7;
+  if (weeks < 8) {
+    return `${weeks.toFixed(1)} weeks`;
+  }
+  const months = days / 30;
+  if (months < 24) {
+    return `${months.toFixed(1)} months`;
+  }
+  const years = days / 365;
+  return `${years.toFixed(1)} years`;
+};
+
 const normalizeCount = (value) => {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : 0;
@@ -101,24 +129,58 @@ const formatNumber = (value) => {
   if (typeof value === 'string' && value.trim()) {
     return value;
   }
-  return '—';
+  return '\u2014';
 };
 
 const formatMonths = (value) => MONTHS_FORMATTER.format(value);
 
 const sanitizeNickname = (value) => {
-  if (typeof value !== 'string') {
+  if (value == null) {
     return 'Unknown';
   }
-  const trimmed = value.trim();
-  if (!trimmed) {
+  const input = String(value).trim();
+  if (!input) {
     return 'Unknown';
   }
   try {
-    return trimmed.normalize('NFKC');
+    const normalized = input.normalize('NFKC').replace(/[\u0000-\u001F\u007F-\u009F]+/g, '').trim();
+    return normalized || 'Unknown';
   } catch {
-    return trimmed;
+    const cleaned = input.replace(/[\u0000-\u001F\u007F-\u009F]+/g, '').trim();
+    return cleaned || 'Unknown';
   }
+};
+
+const buildProjection = (likesCurrent, dailyRateEstimate = null) => {
+  const safeLikes = Math.max(0, Number.isFinite(likesCurrent) ? likesCurrent : 0);
+  const targetLikes = safeLikes >= LIKES_GOAL ? 1000000 : LIKES_GOAL;
+  const likesRemaining = Math.max(0, targetLikes - safeLikes);
+
+  const baselineDailyRate = BASELINE_DAILY_RATE;
+  const baselineMonthlyRate = BASELINE_MONTHLY_RATE;
+
+  const averageDailyRate = baselineDailyRate;
+  const avgDaysToTarget = likesRemaining > 0 ? likesRemaining / averageDailyRate : 0;
+  const avgMonths = likesRemaining > 0 ? likesRemaining / baselineMonthlyRate : 0;
+
+  const resolvedDailyRate =
+    Number.isFinite(dailyRateEstimate) && dailyRateEstimate > 0
+      ? dailyRateEstimate
+      : baselineDailyRate;
+  const actualDaysToTarget = likesRemaining > 0 ? likesRemaining / resolvedDailyRate : 0;
+
+  return {
+    targetLikes,
+    likesRemainingToTarget: likesRemaining,
+    averageDailyRate,
+    avgDaysToTarget,
+    avgDaysLabel: formatDayCount(avgDaysToTarget),
+    avgMonths,
+    avgMonthsLabel: formatMonths(avgMonths),
+    actualDailyRate: resolvedDailyRate,
+    actualDaysToTarget,
+    actualDaysLabel: formatDayCount(actualDaysToTarget),
+  };
 };
 
 export default function HomePage() {
@@ -168,22 +230,29 @@ export default function HomePage() {
   );
 
   const buildInfoUrl = useCallback(
-    (id) => `${infoEndpoint}${encodeURIComponent(`${infoPath}${id}`)}`,
+    (id) => `${infoEndpoint}?${infoPath}${encodeURIComponent(id)}`,
     [infoEndpoint, infoPath],
   );
 
-  const fetchNickname = useCallback(
+  const fetchProfileSnapshot = useCallback(
     async (id) => {
       try {
         const response = await fetch(buildInfoUrl(id));
         if (!response.ok) {
-          return 'Unknown';
+          return null;
         }
         const data = await response.json();
-        const nickname = data?.basicInfo?.nickname;
-        return typeof nickname === 'string' && nickname.trim() ? nickname : 'Unknown';
-      } catch {
-        return 'Unknown';
+        const basicInfo = data?.basicInfo;
+        if (!basicInfo) {
+          return null;
+        }
+        const nickname = sanitizeNickname(basicInfo.nickname ?? 'Unknown');
+        const level = normalizeCount(basicInfo.level);
+        const likes = normalizeCount(basicInfo.liked);
+        return { nickname, level, likes };
+      } catch (error) {
+        console.error('Profile lookup failed for UID', id, error);
+        return null;
       }
     },
     [buildInfoUrl],
@@ -261,19 +330,36 @@ export default function HomePage() {
     }
 
     if (!expiration) {
-      setOverrideCandidate(trimmed);
+      setOverrideCandidate(null);
       setOverrideCode('');
       syncSecretOverride(null);
+
+      const snapshot = await fetchProfileSnapshot(trimmed);
+      const currentLikes =
+        snapshot && Number.isFinite(snapshot.likes) ? snapshot.likes : 0;
+      const projection = buildProjection(currentLikes, BASELINE_DAILY_RATE);
+
+      const lines = [
+        'We could not find this UID in the active registry.',
+        'Reach out to the GEEKS FF team to get set up before sending likes.',
+      ];
+
+      if (projection.likesRemainingToTarget <= 0) {
+        lines.push('Milestone already achieved—keep stacking the streak!');
+      }
+
+      const copyLines = [
+        'UID not registered. Contact the GEEKS FF team to register before sending likes.',
+        ...lines,
+      ];
+
       setResult({
         status: 'error',
         title: 'UID not registered',
-        lines: [
-          'We could not find this UID in the active registry.',
-          'Reach out to the GEEKS FF team to get set up before sending likes.',
-          'Have a priority code? Enter it below to unlock a one-time like session.',
-        ],
-        copyText:
-          'UID not registered. Contact the GEEKS FF team to register before sending likes.',
+        lines,
+        copyText: copyLines.join('\n'),
+        motivationProjection: projection,
+        previewSnapshot: snapshot ? { ...snapshot, likes: currentLikes } : null,
       });
       return;
     }
@@ -308,18 +394,29 @@ export default function HomePage() {
           'Try again after 1:30 AM Sri Lankan time.',
         ];
 
+        const snapshot = await fetchProfileSnapshot(trimmed);
+        const currentLikes =
+          snapshot && Number.isFinite(snapshot.likes) ? snapshot.likes : 0;
+        const projection = buildProjection(currentLikes, BASELINE_DAILY_RATE);
+
         setResult({
           status: 'warning',
           title: message,
           lines,
           copyText: [message, ...lines].join('\n'),
+          motivationProjection: projection,
+          previewSnapshot: snapshot ? { ...snapshot, likes: currentLikes } : null,
         });
         return;
       }
 
       if (data?.status === 1 && data?.response) {
-        let nickname = await fetchNickname(trimmed);
-        nickname = sanitizeNickname(nickname);
+        const profileSnapshot = await fetchProfileSnapshot(trimmed);
+        const profileLikes =
+          profileSnapshot && Number.isFinite(profileSnapshot.likes)
+            ? profileSnapshot.likes
+            : null;
+        let nickname = profileSnapshot?.nickname ?? 'Unknown';
         const fallbackNickname = sanitizeNickname(data.response.PlayerNickname);
         if (nickname === 'Unknown' && fallbackNickname !== 'Unknown') {
           nickname = fallbackNickname;
@@ -328,11 +425,13 @@ export default function HomePage() {
         const formattedExpiry = formatSriLankaTime(expiration);
         const level = normalizeCount(data.response.PlayerLevel);
         const likesBefore = normalizeCount(data.response.LikesbeforeCommand);
-        const likesAfter = normalizeCount(data.response.LikesafterCommand);
+        // Prefer live profile likes for visualization, fall back to API response.
+        const likesAfterCommand = normalizeCount(data.response.LikesafterCommand);
+        const likesAfter = profileLikes ?? likesAfterCommand;
         const likesGiven = normalizeCount(data.response.LikesGivenByAPI);
-        const likesNeeded = Math.max(0, LIKES_GOAL - likesAfter);
-        const estimatedMonthsRaw = likesNeeded > 0 ? likesNeeded / 3000 : 0;
-        const estimatedMonths = likesNeeded > 0 ? Math.max(estimatedMonthsRaw, 0.01) : 0;
+        const projection = buildProjection(likesAfter, likesGiven);
+        const likesNeeded = projection.likesRemainingToTarget;
+        const estimatedMonths = projection.avgMonths;
         const levelLabel = formatNumber(level);
         const likesBeforeLabel = formatNumber(likesBefore);
         const likesAfterLabel = formatNumber(likesAfter);
@@ -358,6 +457,7 @@ export default function HomePage() {
           estimatedMonthsLabel,
           remaining,
           expires: formattedExpiry,
+          projection,
         };
 
         const baseLines = [
@@ -376,9 +476,10 @@ export default function HomePage() {
           const neededLabel = details.likesNeededLabel ?? formatNumber(details.likesNeeded);
           const monthsLabel =
             details.estimatedMonthsLabel ?? formatMonths(details.estimatedMonths);
+          const targetLikesLabel = formatNumber(details.projection?.targetLikes ?? LIKES_GOAL);
           motivationLines.push(
-            `${neededLabel} more likes needed to reach 100,000.`,
-            `You can achieve it in about ${monthsLabel} months at 3,000 likes per month.`,
+            `Likes Needed for ${targetLikesLabel} Likes: ${neededLabel}`,
+            `Months needed for ${targetLikesLabel} Likes: ${monthsLabel} (avg 3000/month)`,
             'Stay connected with us!',
           );
         }
@@ -414,7 +515,7 @@ export default function HomePage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [buildLikeUrl, fetchNickname, isSubmitting, overrideCandidate, registry, syncSecretOverride, uid]);
+  }, [buildLikeUrl, fetchProfileSnapshot, isSubmitting, overrideCandidate, registry, syncSecretOverride, uid]);
 
   const handleOverrideCodeChange = useCallback((event) => {
     setOverrideCode(event.target.value);
@@ -492,10 +593,6 @@ export default function HomePage() {
   }, []);
 
   const statusStyle = result ? STATUS_STYLES[result.status] : '';
-  const overrideUnlocked =
-    secretOverride?.uid === uid && (secretOverride?.unlockedUntil ?? 0) > Date.now();
-  const showOverridePrompt =
-    overrideCandidate && overrideCandidate === uid && !overrideUnlocked;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -630,7 +727,8 @@ export default function HomePage() {
                       {result.details.likesNeeded > 0 && (
                         <div>
                           <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                            Likes to 100K
+                            Likes needed for{' '}
+                            {formatNumber(result.details.projection?.targetLikes ?? LIKES_GOAL)} likes
                           </dt>
                           <dd className="mt-1 font-medium text-slate-100">
                             {result.details.likesNeededLabel ??
@@ -641,7 +739,7 @@ export default function HomePage() {
                       {result.details.likesNeeded > 0 && (
                         <div>
                           <dt className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                            Estimated months (3k/mo)
+                            Months needed (avg 3000/month)
                           </dt>
                           <dd className="mt-1 font-medium text-slate-100">
                             {result.details.estimatedMonthsLabel ??
@@ -650,46 +748,6 @@ export default function HomePage() {
                         </div>
                       )}
                     </dl>
-                  )}
-
-                  {showOverridePrompt && (
-                    <form
-                      onSubmit={handleOverrideSubmit}
-                      className="mt-4 grid gap-3 rounded-2xl border border-cyan-400/40 bg-slate-950/40 p-4 text-xs text-slate-200"
-                    >
-                      <label
-                        htmlFor="override-code"
-                        className="text-[11px] uppercase tracking-[0.4em] text-cyan-300"
-                      >
-                        Priority access key
-                      </label>
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <input
-                          id="override-code"
-                          type="password"
-                          value={overrideCode}
-                          onChange={handleOverrideCodeChange}
-                          autoComplete="off"
-                          className="w-full rounded-xl border border-white/15 bg-slate-900/80 px-3 py-2 text-sm font-semibold tracking-wide text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-400/40 sm:max-w-xs"
-                          placeholder="Enter access code"
-                        />
-                        <button
-                          type="submit"
-                          className="inline-flex items-center justify-center rounded-full border border-cyan-400/60 bg-cyan-500/20 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.3em] text-cyan-100 transition-colors hover:bg-cyan-400/30"
-                        >
-                          Unlock
-                        </button>
-                      </div>
-                      <p className="text-[11px] text-slate-400">
-                        Enter the shared code to deliver likes to a UID that remains off the main list.
-                      </p>
-                    </form>
-                  )}
-
-                  {overrideUnlocked && (
-                    <div className="mt-4 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-100">
-                      Priority tunnel open — hit &quot;Send Like&quot; again to deploy.
-                    </div>
                   )}
 
                   {result.copyText && (
@@ -800,3 +858,4 @@ export default function HomePage() {
     </div>
   );
 }
+
