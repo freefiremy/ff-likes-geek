@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const INFO_BASE = Buffer.from('aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0Lw==', 'base64').toString('utf-8');
 const INFO_PATH = Buffer.from('aW5mbz0=', 'base64').toString('utf-8');
@@ -19,9 +19,7 @@ export async function GET(_request, { params }) {
   const targetUrl = `${INFO_BASE}${INFO_PATH}${uid}`;
 
   try {
-    const response = await fetch(targetUrl, {
-      next: { revalidate: 0 },
-    });
+    const response = await fetch(targetUrl);
 
     if (!response.ok) {
       const payload = await response.text();
