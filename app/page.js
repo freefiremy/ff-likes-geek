@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 const gummyNimbus = 'YXN0dXRlMmsz';
 const sleepyTrails = {
   like: ['aHR0cHM6Ly9saWtlcy4=', 'YXBpLmZyZWVmaXJl', 'b2ZmaWNpYWwuY29tL2FwaS9zZy8='],
-  info: ['aHR0cDovLzIxNy4xNTQuMjM5LjIzOjEzOTg0Lw=='],
+  info: ['L2FwaS9pbmZv'], // base64 for '/api/info'
   infoPath: ['aW5mbz0='],
 };
 
