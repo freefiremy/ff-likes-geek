@@ -213,7 +213,7 @@ export default function HomePage() {
   );
 
   const buildInfoUrl = useCallback(
-    (id) => `${infoEndpoint}${infoPath}${id}`,
+    (id) => `${infoEndpoint}${infoPath}${encodeURIComponent(id)}`,
     [infoEndpoint, infoPath],
   );
 
