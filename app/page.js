@@ -49,6 +49,34 @@ const murkyLedger = {
   'MTk4NzczMjUx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0wN1QwMDowMDowMCswNTozMCJ9',
 };
 
+const nicknameLedger = Object.freeze({
+  '2805365702': 'RasikaSrimal',
+  '2506149880': 'HEY.Podii_?',
+  '2052580132': 'LiyonCursed',
+  '2874290965': '★GEEK★『sLc』',
+  '1895028854': 'Unknown',
+  '365436696': '★IRASH★『sLc』',
+  '753524839': 'Aѕʟᴍʀ┃RUSHᅠ★',
+  '923824741': 'OGGγ5 Śҽყϝαα',
+  '5145644786': 'SLᅠROSHANᅠ亗',
+  '1918301914': '★SCEMO★『sLc』',
+  '288242525': 'HEY.Ghost<',
+  '2138418869': 'X_SACHIN®★',
+  '1710884148': 'ᅠ98ᅠᴀᴍᴀsʜɪᅠ',
+  '172102828': '98ᅠᴊᴋ',
+  '2328111533': 'Cѕʟᴍʀ┃ERAN',
+  '908349536': '98-DANA',
+  '401293587': 'xTOP/ISHARA亗',
+  '2114064014': 'シXɪᴀᴏᅠʏᴀɴᅠ',
+  '2909875725': 'TᅠuᅠTᅠuᅠ亗',
+  '1419466272': '★MAKARA★sLc',
+  '3283108712': 'sleepysnow`',
+  '1153186180': 'naahihi.',
+  '2607412181': 'Bѕʟᴍʀ┃SNOOP',
+  '3089004724': 'unaaè.',
+  '198773251': 'accnotFound-',
+});
+
 const STATUS_STYLES = {
   success: 'border-emerald-400/50 bg-emerald-400/10 text-emerald-200',
   warning: 'border-amber-400/50 bg-amber-400/10 text-amber-100',
@@ -243,15 +271,26 @@ export default function HomePage() {
         const data = await response.json();
         const basicInfo = data?.basicInfo;
         if (!basicInfo) {
-          return null;
+          const fallbackNickname = nicknameLedger[id] ?? 'Unknown';
+          return {
+            nickname: sanitizeNickname(fallbackNickname),
+            level: null,
+            likes: null,
+          };
         }
-        const nickname = sanitizeNickname(basicInfo.nickname ?? 'Unknown');
+        const fallbackNickname = nicknameLedger[id] ?? 'Unknown';
+        const nickname = sanitizeNickname(basicInfo.nickname ?? fallbackNickname);
         const level = normalizeCount(basicInfo.level);
         const likes = normalizeCount(basicInfo.liked);
         return { nickname, level, likes };
       } catch (error) {
         console.error('Profile lookup failed for UID', id, error);
-        return null;
+        const fallbackNickname = nicknameLedger[id] ?? 'Unknown';
+        return {
+          nickname: sanitizeNickname(fallbackNickname),
+          level: null,
+          likes: null,
+        };
       }
     },
     [buildInfoUrl],
@@ -416,9 +455,12 @@ export default function HomePage() {
             ? profileSnapshot.likes
             : null;
         let nickname = profileSnapshot?.nickname ?? 'Unknown';
-        const fallbackNickname = sanitizeNickname(data.response.PlayerNickname);
-        if (nickname === 'Unknown' && fallbackNickname !== 'Unknown') {
-          nickname = fallbackNickname;
+        const registryNickname = sanitizeNickname(nicknameLedger[data.response.UID] ?? 'Unknown');
+        const fallbackNickname = sanitizeNickname(
+          data.response.PlayerNickname ?? registryNickname,
+        );
+        if (nickname === 'Unknown') {
+          nickname = fallbackNickname !== 'Unknown' ? fallbackNickname : registryNickname;
         }
         const remaining = calculateRemainingDays(expiration);
         const formattedExpiry = formatSriLankaTime(expiration);
