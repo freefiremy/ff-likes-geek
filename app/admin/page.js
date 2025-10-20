@@ -36,6 +36,34 @@ const ENCODED_REGISTRY = {
   'MTk4NzczMjUx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0wN1QwMDowMDowMCswNTozMCJ9',
 };
 
+const nicknameLedger = Object.freeze({
+  '2805365702': 'RasikaSrimal',
+  '2506149880': 'HEY.Podii_?',
+  '2052580132': 'LiyonCursed',
+  '2874290965': '★GEEK★『sLc』',
+  '1895028854': 'Unknown',
+  '365436696': '★IRASH★『sLc』',
+  '753524839': 'Aѕʟᴍʀ┃RUSHᅠ★',
+  '923824741': 'OGGγ5 Śҽყϝαα',
+  '5145644786': 'SLᅠROSHANᅠ亗',
+  '1918301914': '★SCEMO★『sLc』',
+  '288242525': 'HEY.Ghost<',
+  '2138418869': 'X_SACHIN®★',
+  '1710884148': 'ᅠ98ᅠᴀᴍᴀsʜɪᅠ',
+  '172102828': '98ᅠᴊᴋ',
+  '2328111533': 'Cѕʟᴍʀ┃ERAN',
+  '908349536': '98-DANA',
+  '401293587': 'xTOP/ISHARA亗',
+  '2114064014': 'シXɪᴀᴏᅠʏᴀɴᅠ',
+  '2909875725': 'TᅠuᅠTᅠuᅠ亗',
+  '1419466272': '★MAKARA★sLc',
+  '3283108712': 'sleepysnow`',
+  '1153186180': 'naahihi.',
+  '2607412181': 'Bѕʟᴍʀ┃SNOOP',
+  '3089004724': 'unaaè.',
+  '198773251': 'accnotFound-',
+});
+
 const INITIAL_USERS = buildInitialUsersFromRegistry(ENCODED_REGISTRY);
 
 const STATUS_STYLES = {
@@ -50,6 +78,25 @@ function decodeBase64(value) {
     return window.atob(value);
   }
   return Buffer.from(value, 'base64').toString('utf-8');
+}
+
+function sanitizeNickname(input) {
+  if (!input) {
+    return 'Unknown';
+  }
+  try {
+    const normalized = input.normalize('NFKC').replace(/[\u0000-\u001F\u007F-\u009F]+/g, '').trim();
+    return normalized || 'Unknown';
+  } catch {
+    const cleaned = input.replace(/[\u0000-\u001F\u007F-\u009F]+/g, '').trim();
+    return cleaned || 'Unknown';
+  }
+}
+
+function resolveNickname(uid, fallback) {
+  const candidate =
+    typeof fallback === 'string' && fallback.trim() ? fallback : nicknameLedger[uid] ?? 'Unknown';
+  return sanitizeNickname(candidate);
 }
 
 function parseMoney(value) {
@@ -78,6 +125,7 @@ function buildInitialUsersFromRegistry(registry) {
     const uid = decodeBase64(encodedUid);
     let expiration = new Date().toISOString();
     let money = DEFAULT_MONEY;
+    let nickname = resolveNickname(uid);
 
     try {
       const decodedPayload = JSON.parse(decodeBase64(encodedPayload));
@@ -87,6 +135,9 @@ function buildInitialUsersFromRegistry(registry) {
       if (decodedPayload?.money !== undefined) {
         money = parseMoney(decodedPayload.money);
       }
+      if (decodedPayload?.nickname) {
+        nickname = resolveNickname(uid, decodedPayload.nickname);
+      }
     } catch {
       // swallow decode errors and keep fallback values
     }
@@ -95,6 +146,7 @@ function buildInitialUsersFromRegistry(registry) {
       uid,
       expiration,
       money,
+      nickname,
     };
   });
 }
@@ -112,6 +164,7 @@ function mergeStoredUsersWithBaseline(storedUsers, baselineUsers) {
     storedMap.set(user.uid, {
       ...user,
       money: parseMoney(user.money),
+      nickname: resolveNickname(user.uid, user.nickname),
     });
   });
 
@@ -122,14 +175,21 @@ function mergeStoredUsersWithBaseline(storedUsers, baselineUsers) {
       return {
         ...override,
         expiration: user.expiration,
+        nickname: resolveNickname(user.uid, override.nickname ?? user.nickname),
         money: parseMoney(override.money ?? user.money),
       };
     }
-    return { ...user };
+    return {
+      ...user,
+      nickname: resolveNickname(user.uid, user.nickname),
+    };
   });
 
   storedMap.forEach((user) => {
-    merged.push({ ...user });
+    merged.push({
+      ...user,
+      nickname: resolveNickname(user.uid, user.nickname),
+    });
   });
 
   return merged;
@@ -186,8 +246,10 @@ export default function AdminDashboardPage() {
         ? Math.max(0, Math.ceil((expirationTime - now) / (1000 * 60 * 60 * 24)))
         : 0;
       const isVip = daysLeft > 1000;
+      const nickname = resolveNickname(user.uid, user.nickname);
       return {
         ...user,
+        nickname,
         expirationDate,
         isValidExpiration,
         status: isExpired ? 'expired' : 'active',
@@ -295,10 +357,15 @@ export default function AdminDashboardPage() {
                     key={user.uid}
                     className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm text-slate-300"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-base font-semibold text-slate-100">
-                        {user.uid}
-                      </span>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <span className="block font-mono text-base font-semibold text-slate-100">
+                          {user.uid}
+                        </span>
+                        <p className="mt-1 truncate text-sm font-semibold text-slate-200">
+                          {user.nickname}
+                        </p>
+                      </div>
                       <span
                         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ${statusClasses}`}
                       >
@@ -335,6 +402,7 @@ export default function AdminDashboardPage() {
                   <thead className="text-xs uppercase tracking-[0.3em] text-slate-400">
                     <tr>
                       <th className="py-3 pr-4">UID</th>
+                      <th className="py-3 pr-4">Nickname</th>
                       <th className="py-3 pr-4">
                         <button
                           type="button"
@@ -380,6 +448,7 @@ export default function AdminDashboardPage() {
                       return (
                         <tr key={user.uid}>
                           <td className="py-4 pr-4 font-mono text-sm text-slate-100">{user.uid}</td>
+                          <td className="py-4 pr-4 text-slate-100">{user.nickname}</td>
                           <td className="py-4 pr-4 text-slate-300">{daysLeftLabel}</td>
                           <td className="py-4 pr-4">
                             <span
