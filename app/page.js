@@ -47,6 +47,7 @@ const murkyLedger = {
   'MjYwNzQxMjE4MQ==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMC0zMFQwMDowMDowMCswNTozMCJ9',
   'MzA4OTAwNDcyNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0yMVQwMDowMDowMCswNTozMCJ9',
   'MTk4NzczMjUx': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0wN1QwMDowMDowMCswNTozMCJ9',
+  'MjIwODg1ODQy': 'eyJleHBpcmF0aW9uIjoiMjAyNi0wMy0yMlQwMDowMDowMCswNTozMCJ9',
 };
 
 const nicknameLedger = Object.freeze({
@@ -54,7 +55,7 @@ const nicknameLedger = Object.freeze({
   '2506149880': 'HEY.Podii_?',
   '2052580132': 'LiyonCursed',
   '2874290965': '★GEEK★『sLc』',
-  '1895028854': 'Unknown',
+  '1895028854': '★ＲＡＶＡＮ★『sLc』',
   '365436696': '★IRASH★『sLc』',
   '753524839': 'Aѕʟᴍʀ┃RUSHᅠ★',
   '923824741': 'OGGγ5 Śҽყϝαα',
@@ -75,6 +76,7 @@ const nicknameLedger = Object.freeze({
   '2607412181': 'Bѕʟᴍʀ┃SNOOP',
   '3089004724': 'unaaè.',
   '198773251': 'accnotFound-',
+  '220885842': 'Sᴜʟᴛʜᴀɴㅤ4M',
 });
 
 const STATUS_STYLES = {
