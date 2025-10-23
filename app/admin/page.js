@@ -63,6 +63,7 @@ const nicknameLedger = Object.freeze({
   '2607412181': 'Bѕʟᴍʀ┃SNOOP',
   '3089004724': 'unaaè.',
   '198773251': 'accnotFound-',
+  '220885842': 'Sᴜʟᴛʜᴀɴㅤ4M',
 });
 
 const INITIAL_USERS = buildInitialUsersFromRegistry(ENCODED_REGISTRY);
