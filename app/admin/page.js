@@ -21,7 +21,7 @@ const ENCODED_REGISTRY = {
   'MTkxODMwMTkxNA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wM1QwMDowMDowMCswNTozMCJ9',
   'Mjg4MjQyNTI1': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
   'MjEzODQxODg2OQ==': 'eyJleHBpcmF0aW9uIjoiMjEwMC0wMS0wMVQwMDowMDowMFoifQ==',
-  'MTcxMDg4NDE0OA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
+  'MTcxMDg4NDE0OA==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0xMS0yNlQwMDowMDowMCswNTozMCJ9',
   'MTcyMTAyODI4': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'MjMyODExMTUzMw==': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
   'OTA4MzQ5NTM2': 'eyJleHBpcmF0aW9uIjoiMjAyNS0wOC0wNFQwMDowMDowMCswNTozMCJ9',
@@ -50,7 +50,7 @@ const nicknameLedger = Object.freeze({
   '1918301914': '★SCEMO★『sLc』',
   '288242525': 'HEY.Ghost<',
   '2138418869': 'X_SACHIN®★',
-  '1710884148': 'ᅠ98ᅠᴀᴍᴀsʜɪᅠ',
+  '1710884148': 'ㅤ⁹⁸ㅤᴀᴍᴀsʜɪㅤ',
   '172102828': '98ᅠᴊᴋ',
   '2328111533': 'Cѕʟᴍʀ┃ERAN',
   '908349536': '98-DANA',
@@ -62,7 +62,7 @@ const nicknameLedger = Object.freeze({
   '1153186180': 'naahihi.',
   '2607412181': 'Bѕʟᴍʀ┃SNOOP',
   '3089004724': 'unaaè.',
-  '198773251': 'accnotFound-',
+  '198773251': 'Mella',
   '220885842': 'Sᴜʟᴛʜᴀɴㅤ4M',
 });
 
